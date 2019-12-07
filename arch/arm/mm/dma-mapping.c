@@ -17,6 +17,7 @@
 #include <linux/dma-direct.h>
 #include <linux/dma-iommu.h>
 #include <linux/dma-map-ops.h>
+#include <linux/dma-mapping.h>
 #include <linux/highmem.h>
 #include <linux/memblock.h>
 #include <linux/slab.h>
@@ -2282,12 +2283,17 @@ void arch_setup_dma_ops(struct device *dev, u64 dma_base, u64 size,
 	if (dev->dma_ops)
 		return;
 
-	if (arm_setup_iommu_dma_ops(dev, dma_base, size, iommu))
-		dma_ops = arm_get_iommu_dma_map_ops(coherent);
-	else
-		dma_ops = arm_get_dma_map_ops(coherent);
+	if (iommu)
+		iommu_setup_dma_ops(dev, dma_base, size);
 
-	set_dma_ops(dev, dma_ops);
+	if (!dev->dma_ops) {
+		if (arm_setup_iommu_dma_ops(dev, dma_base, size, iommu))
+			dma_ops = arm_get_iommu_dma_map_ops(coherent);
+		else
+			dma_ops = arm_get_dma_map_ops(coherent);
+
+		set_dma_ops(dev, dma_ops);
+	}
 
 #ifdef CONFIG_XEN
 	if (xen_initial_domain())
