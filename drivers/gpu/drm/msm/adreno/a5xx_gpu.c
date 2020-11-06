@@ -908,9 +908,11 @@ static int a5xx_hw_init(struct msm_gpu *gpu)
 		MSM_GPU_RB_CNTL_DEFAULT | AXXX_CP_RB_CNTL_NO_UPDATE);
 
 	/* Disable preemption if WHERE_AM_I isn't available */
-	if (!a5xx_gpu->has_whereami && gpu->nr_rings > 1) {
-		a5xx_preempt_fini(gpu);
-		gpu->nr_rings = 1;
+	if (!a5xx_gpu->has_whereami) {
+		if (gpu->nr_rings > 1) {
+			a5xx_preempt_fini(gpu);
+			gpu->nr_rings = 1;
+		}
 	} else {
 		/* Create a privileged buffer for the RPTR shadow */
 		if (!a5xx_gpu->shadow_bo) {
