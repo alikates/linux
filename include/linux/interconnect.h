@@ -45,6 +45,15 @@ int icc_bulk_set_bw(int num_paths, const struct icc_bulk_data *paths);
 int icc_bulk_enable(int num_paths, const struct icc_bulk_data *paths);
 void icc_bulk_disable(int num_paths, const struct icc_bulk_data *paths);
 
+#if IS_ENABLED(CONFIG_OF)
+int of_icc_bulk_set_defaults(struct device *dev, int num_paths,
+			      struct icc_bulk_data *paths);
+#else
+static inline int of_icc_bulk_set_defaults(struct device *dev, int num_paths,
+			      struct icc_bulk_data *paths)
+{ return 0; }
+#endif
+
 #if IS_ENABLED(CONFIG_INTERCONNECT)
 
 struct icc_path *icc_get(struct device *dev, const int src_id,
