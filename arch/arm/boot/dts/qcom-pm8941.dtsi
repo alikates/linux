@@ -2,6 +2,8 @@
 #include <dt-bindings/iio/qcom,spmi-vadc.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/spmi/spmi.h>
+#include <dt-bindings/leds/common.h>
+#include <dt-bindings/leds/leds-qcom-spmi-flash.h>
 
 &spmi_bus {
 
@@ -187,6 +189,42 @@
 				qcom,ocp-retry-delay = <30>;
 				qcom,vs-soft-start-strength = <0>;
 				regulator-initial-mode = <1>;
+			};
+		};
+
+		qcom,spmi-flash@d300 {
+			status = "okay";
+
+			compatible = "qcom,spmi-flash";
+			reg = <0xd300 0x100>;
+			flash-boost-supply = <&pm8941_5vs1>;
+			torch-boost-supply = <&pm8941_5v>;
+			pm8941_flash0: led0 {
+				led-sources = <0>;
+				function = LED_FUNCTION_FLASH;
+				color = <LED_COLOR_ID_WHITE>;
+				led-max-microamp = <200000>;
+				flash-max-microamp = <1000000>;
+				flash-max-timeout-us = <1280000>;
+				default-state = "off";
+				qcom,clamp-curr = <200000>;
+				qcom,headroom = <QCOM_SPMI_FLASH_HEADROOM_500MV>;
+				qcom,startup-dly = <QCOM_SPMI_FLASH_STARTUP_DLY_128US>;
+				qcom,safety-timer;
+			};
+
+			pm8941_flash1: led1 {
+				led-sources = <1>;
+				function = LED_FUNCTION_FLASH;
+				color = <LED_COLOR_ID_WHITE>;
+				led-max-microamp = <200000>;
+				flash-max-microamp = <1000000>;
+				flash-max-timeout-us = <1280000>;
+				default-state = "off";
+				qcom,clamp-curr = <200000>;
+				qcom,headroom = <QCOM_SPMI_FLASH_HEADROOM_500MV>;
+				qcom,startup-dly = <QCOM_SPMI_FLASH_STARTUP_DLY_128US>;
+				qcom,safety-timer;
 			};
 		};
 	};
