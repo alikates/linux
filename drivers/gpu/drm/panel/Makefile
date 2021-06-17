@@ -72,3 +72,4 @@ obj-$(CONFIG_DRM_PANEL_WIDECHIPS_WS2401) += panel-widechips-ws2401.o
 obj-$(CONFIG_DRM_PANEL_XINPENG_XPP055C272) += panel-xinpeng-xpp055c272.o
 obj-$(CONFIG_DRM_PANEL_MSM8916_GENERATED) += msm8916-generated/
 obj-$(CONFIG_DRM_PANEL_HIMAX_HX8399C_FHDPLUS) += panel-himax-hx8399c-fhdplus.o
+obj-$(CONFIG_DRM_PANELS_XIAOMI_MIDO) +=panels-xiaomi-mido.o
