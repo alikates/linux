@@ -111,16 +111,6 @@
 #define CHG_INHIBIT_BIT			BIT(1)
 #define BAT_TCC_REACHED_BIT		BIT(7)
 
-/* BAT_IF_RT_STS bits */
-#define HOT_BAT_HARD_BIT		BIT(0)
-#define HOT_BAT_SOFT_BIT		BIT(1)
-#define COLD_BAT_HARD_BIT		BIT(2)
-#define COLD_BAT_SOFT_BIT		BIT(3)
-#define BAT_OV_BIT			BIT(4)
-#define BAT_LOW_BIT			BIT(5)
-#define BAT_MISSING_BIT			BIT(6)
-#define BAT_TERM_MISSING_BIT		BIT(7)
-
 /* USB_CHGPTH_RT_STS bits */
 #define USBIN_OV_BIT			BIT(1)
 #define USBIN_SRC_DET_BIT		BIT(2)
@@ -143,7 +133,6 @@ struct smbchg_chip {
 
 	int otg_resets;
 
-	spinlock_t sec_access_lock;
 	struct work_struct otg_reset_work;
 };
 
@@ -151,36 +140,6 @@ struct smbchg_irq {
 	const char *name;
 	irq_handler_t handler;
 };
-
-static int smbchg_sec_write(struct smbchg_chip *chip, u8 *val, u16 addr, int len)
-{
-	u8 sec_addr_val = 0xa5;
-	int ret;
-
-	ret = regmap_bulk_write(chip->regmap,
-			((chip->base + addr) & 0xff00) | 0xd0,
-			&sec_addr_val, 1);
-	if (ret)
-		return ret;
-
-	return regmap_bulk_write(chip->regmap, chip->base + addr, val, len);
-}
-
-/* TODO: Use and remove __maybe_unused */
-static __maybe_unused int smbchg_sec_masked_write(struct smbchg_chip *chip, u16 addr, u8 mask, u8 val)
-{
-	u8 reg;
-	int ret;
-
-	ret = regmap_bulk_read(chip->regmap, chip->base + addr, &reg, 1);
-	if (ret)
-		return ret;
-
-	reg &= ~mask;
-	reg |= val & mask;
-
-	return smbchg_sec_write(chip, &reg, addr, 1);
-}
 
 static int smbchg_otg_enable(struct regulator_dev *rdev)
 {
@@ -344,15 +303,6 @@ irqreturn_t smbchg_handle_charger_error(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-irqreturn_t smbchg_handle_batt_temp(int irq, void *data)
-{
-	struct smbchg_chip *chip = data;
-
-	power_supply_changed(chip->usb_psy);
-
-	return IRQ_HANDLED;
-}
-
 irqreturn_t smbchg_handle_otg_fail(int irq, void *data)
 {
 	struct smbchg_chip *chip = data;
@@ -436,10 +386,10 @@ const struct smbchg_irq smbchg_irqs[] = {
 	{ "chg-rechg-thr", NULL },
 	{ "chg-taper-thr", NULL },
 	{ "chg-tcc-thr", NULL },
-	{ "batt-hot", smbchg_handle_batt_temp },
-	{ "batt-warm", smbchg_handle_batt_temp },
-	{ "batt-cold", smbchg_handle_batt_temp },
-	{ "batt-cool", smbchg_handle_batt_temp },
+	{ "batt-hot", NULL },
+	{ "batt-warm", NULL },
+	{ "batt-cold", NULL },
+	{ "batt-cool", NULL },
 	{ "batt-ov", NULL },
 	{ "batt-low", NULL },
 	{ "batt-missing", NULL },
@@ -533,36 +483,9 @@ static int smbchg_get_status(struct smbchg_chip *chip)
 	}
 }
 
-static int smbchg_get_health(struct smbchg_chip *chip)
-{
-	int value, ret;
-
-	ret = regmap_read(chip->regmap, chip->base + SMBCHG_BAT_IF_RT_STS,
-				&value);
-	if (ret) {
-		dev_err(chip->dev, "Failed to read battery status: %d\n", ret);
-		return POWER_SUPPLY_HEALTH_UNKNOWN;
-	}
-
-	if (value & HOT_BAT_HARD_BIT)
-		return POWER_SUPPLY_HEALTH_OVERHEAT;
-
-	else if (value & HOT_BAT_SOFT_BIT)
-		return POWER_SUPPLY_HEALTH_WARM;
-
-	else if (value & COLD_BAT_HARD_BIT)
-		return POWER_SUPPLY_HEALTH_COLD;
-
-	else if (value & COLD_BAT_SOFT_BIT)
-		return POWER_SUPPLY_HEALTH_COOL;
-
-	return POWER_SUPPLY_HEALTH_GOOD;
-}
-
 static enum power_supply_property smbchg_props[] = {
 	POWER_SUPPLY_PROP_STATUS,
 	POWER_SUPPLY_PROP_CHARGE_TYPE,
-	POWER_SUPPLY_PROP_HEALTH,
 	POWER_SUPPLY_PROP_PRESENT,
 	POWER_SUPPLY_PROP_ONLINE
 };
@@ -581,9 +504,6 @@ static int smbchg_get_property(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_TYPE:
 		val->intval = smbchg_get_charge_type(chip);
-		break;
-	case POWER_SUPPLY_PROP_HEALTH:
-		val->intval = smbchg_get_health(chip);
 		break;
 	case POWER_SUPPLY_PROP_PRESENT:
 	case POWER_SUPPLY_PROP_ONLINE:
@@ -651,7 +571,6 @@ static int smbchg_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	spin_lock_init(&chip->sec_access_lock);
 	INIT_WORK(&chip->otg_reset_work, smbchg_otg_reset_worker);
 
 	/* Interrupts */
