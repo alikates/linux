@@ -1053,7 +1053,8 @@ static int qcom_fg_probe(struct platform_device *pdev)
 	}
 
 	/* Check and clear DMA errors */
-	ret = qcom_fg_read(chip, &dma_status, MEM_IF_DMA_STS, 1);
+	//TODO: only don't do this on pmi8950
+	/* ret = qcom_fg_read(chip, &dma_status, MEM_IF_DMA_STS, 1);
 	if (ret < 0) {
 		dev_err(chip->dev, "Failed to read dma_status: %d\n", ret);
 		return ret;
@@ -1065,7 +1066,7 @@ static int qcom_fg_probe(struct platform_device *pdev)
 	if (ret < 0) {
 		dev_err(chip->dev, "Failed to write dma_ctl: %d\n", ret);
 		return ret;
-	}
+	} */
 
 	supply_config.drv_data = chip;
 	supply_config.of_node = pdev->dev.of_node;
