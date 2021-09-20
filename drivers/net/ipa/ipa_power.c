@@ -149,7 +149,7 @@ static int ipa_runtime_suspend(struct device *dev)
 	if (ipa->setup_complete) {
 		__clear_bit(IPA_POWER_FLAG_RESUMED, ipa->power->flags);
 		ipa_endpoint_suspend(ipa);
-		gsi_suspend(&ipa->gsi);
+		gsi_suspend(&ipa->dma_subsys);
 	}
 
 	ipa_power_disable(ipa);
@@ -168,7 +168,7 @@ static int ipa_runtime_resume(struct device *dev)
 
 	/* Endpoints aren't usable until setup is complete */
 	if (ipa->setup_complete) {
-		gsi_resume(&ipa->gsi);
+		gsi_resume(&ipa->dma_subsys);
 		ipa_endpoint_resume(ipa);
 	}
 
