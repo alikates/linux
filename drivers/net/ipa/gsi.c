@@ -100,6 +100,10 @@
 
 #define GSI_ISR_MAX_ITER		50	/* Detect interrupt storms */
 
+static u32 gsi_channel_tre_max(struct ipa_dma *gsi, u32 channel_id);
+static u32 gsi_channel_trans_tre_max(struct ipa_dma *gsi, u32 channel_id);
+static void gsi_exit(struct ipa_dma *gsi);
+
 /* An entry in an event ring */
 struct gsi_event {
 	__le64 xfer_ptr;
@@ -866,7 +870,7 @@ static int __gsi_channel_start(struct ipa_channel *channel, bool resume)
 }
 
 /* Start an allocated GSI channel */
-int gsi_channel_start(struct ipa_dma *gsi, u32 channel_id)
+static int gsi_channel_start(struct ipa_dma *gsi, u32 channel_id)
 {
 	struct ipa_channel *channel = &gsi->channel[channel_id];
 	int ret;
@@ -2207,6 +2211,18 @@ int gsi_init(struct ipa_dma *gsi, struct platform_device *pdev,
 
 	gsi->dev = dev;
 	gsi->version = version;
+	gsi->setup = gsi_setup;
+	gsi->teardown = gsi_teardown;
+	gsi->exit = gsi_exit;
+	gsi->suspend = gsi_suspend;
+	gsi->resume = gsi_resume;
+	gsi->channel_tre_max = gsi_channel_tre_max;
+	gsi->channel_trans_tre_max = gsi_channel_trans_tre_max;
+	gsi->channel_start = gsi_channel_start;
+	gsi->channel_stop = gsi_channel_stop;
+	gsi->channel_reset = gsi_channel_reset;
+	gsi->channel_suspend = gsi_channel_suspend;
+	gsi->channel_resume = gsi_channel_resume;
 
 	/* GSI uses NAPI on all channels.  Create a dummy network device
 	 * for the channel NAPI contexts to be associated with.
@@ -2263,7 +2279,7 @@ err_iounmap:
 }
 
 /* Inverse of gsi_init() */
-void gsi_exit(struct ipa_dma *gsi)
+static void gsi_exit(struct ipa_dma *gsi)
 {
 	mutex_destroy(&gsi->mutex);
 	gsi_channel_exit(gsi);
@@ -2290,7 +2306,7 @@ void gsi_exit(struct ipa_dma *gsi)
  * substantially reduce pool memory requirements.  The number we
  * reduce it by matches the number added in ipa_trans_pool_init().
  */
-u32 gsi_channel_tre_max(struct ipa_dma *gsi, u32 channel_id)
+static u32 gsi_channel_tre_max(struct ipa_dma *gsi, u32 channel_id)
 {
 	struct ipa_channel *channel = &gsi->channel[channel_id];
 
@@ -2299,7 +2315,7 @@ u32 gsi_channel_tre_max(struct ipa_dma *gsi, u32 channel_id)
 }
 
 /* Returns the maximum number of TREs in a single transaction for a channel */
-u32 gsi_channel_trans_tre_max(struct ipa_dma *gsi, u32 channel_id)
+static u32 gsi_channel_trans_tre_max(struct ipa_dma *gsi, u32 channel_id)
 {
 	struct ipa_channel *channel = &gsi->channel[channel_id];
 

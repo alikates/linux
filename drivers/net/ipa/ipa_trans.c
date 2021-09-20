@@ -323,7 +323,7 @@ ipa_trans_tre_release(struct ipa_trans_info *trans_info, u32 tre_count)
 /* Return true if no transactions are allocated, false otherwise */
 bool gsi_channel_trans_idle(struct ipa_dma *gsi, u32 channel_id)
 {
-	u32 tre_max = gsi_channel_tre_max(gsi, channel_id);
+	u32 tre_max = ipa_channel_tre_max(gsi, channel_id);
 	struct ipa_trans_info *trans_info;
 
 	trans_info = &gsi->channel[channel_id].trans_info;
@@ -340,7 +340,7 @@ struct ipa_trans *ipa_channel_trans_alloc(struct ipa_dma *gsi, u32 channel_id,
 	struct ipa_trans_info *trans_info;
 	struct ipa_trans *trans;
 
-	if (WARN_ON(tre_count > gsi_channel_trans_tre_max(gsi, channel_id)))
+	if (WARN_ON(tre_count > ipa_channel_trans_tre_max(gsi, channel_id)))
 		return NULL;
 
 	trans_info = &channel->trans_info;
@@ -732,7 +732,7 @@ int ipa_channel_trans_init(struct ipa_dma *gsi, u32 channel_id)
 	 * for transactions (including transaction structures) based on
 	 * this maximum number.
 	 */
-	tre_max = gsi_channel_tre_max(channel->dma_subsys, channel_id);
+	tre_max = ipa_channel_tre_max(channel->dma_subsys, channel_id);
 
 	/* Transactions are allocated one at a time. */
 	ret = ipa_trans_pool_init(&trans_info->pool, sizeof(struct ipa_trans),
