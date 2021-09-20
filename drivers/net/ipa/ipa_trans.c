@@ -325,9 +325,9 @@ ipa_trans_tre_release(struct ipa_trans_info *trans_info, u32 tre_count)
 }
 
 /* Return true if no transactions are allocated, false otherwise */
-bool gsi_channel_trans_idle(struct ipa_dma *gsi, u32 channel_id)
+bool ipa_channel_trans_idle(struct ipa_dma *gsi, u32 channel_id)
 {
-	u32 tre_max = gsi_channel_tre_max(gsi, channel_id);
+	u32 tre_max = ipa_channel_tre_max(gsi, channel_id);
 	struct ipa_trans_info *trans_info;
 
 	trans_info = &gsi->channel[channel_id].trans_info;
@@ -589,14 +589,18 @@ static void __gsi_trans_commit(struct ipa_trans *trans, bool ring_db)
 		gsi_trans_tre_fill(dest_tre, addr, len, last_tre, bei, opcode);
 		dest_tre++;
 	}
-	/* Associate the TRE with the transaction */
-	gsi_trans_map(trans, tre_ring->index);
 
-	tre_ring->index += trans->used_count;
+	if (channel->toward_ipa) {
+		/* We record TX bytes when they are sent */
+		trans->len = byte_count;
+		trans->trans_count = channel->trans_count;
+		trans->byte_count = channel->byte_count;
+		channel->trans_count++;
+		channel->byte_count += byte_count;
+	}
 
-	trans->len = byte_count;
-	if (channel->toward_ipa)
-		gsi_trans_tx_committed(trans);
+	/* Associate the last TRE with the transaction */
+	gsi_trans_map(trans, tre_ring->index - 1);
 
 	gsi_trans_move_committed(trans);
 
@@ -725,7 +729,7 @@ int ipa_channel_trans_init(struct ipa_dma *gsi, u32 channel_id)
 	 * allocation succeeds only if the TREs available are sufficient
 	 * for what the transaction might need.
 	 */
-	tre_max = gsi_channel_tre_max(channel->dma_subsys, channel_id);
+	tre_max = ipa_channel_tre_max(channel->dma_subsys, channel_id);
 	atomic_set(&trans_info->tre_avail, tre_max);
 
 	/* We can't use more TREs than the number available in the ring.
@@ -736,6 +740,10 @@ int ipa_channel_trans_init(struct ipa_dma *gsi, u32 channel_id)
 	 * modulo that number to determine the next one that's free.
 	 * Transactions are allocated one at a time.
 	 */
+	tre_max = ipa_channel_tre_max(channel->dma_subsys, channel_id);
+	atomic_set(&trans_info->tre_avail, tre_max);
+
+	/* Transactions are allocated one at a time. */
 	ret = ipa_trans_pool_init(&trans_info->pool, sizeof(struct ipa_trans),
 				  tre_max, 1);
 	if (ret)

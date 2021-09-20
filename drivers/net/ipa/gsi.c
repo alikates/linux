@@ -100,6 +100,10 @@
 
 #define GSI_ISR_MAX_ITER		50	/* Detect interrupt storms */
 
+static u32 gsi_channel_tre_max(struct ipa_dma *gsi, u32 channel_id);
+static u32 gsi_channel_trans_tre_max(struct ipa_dma *gsi, u32 channel_id);
+static void gsi_exit(struct ipa_dma *gsi);
+
 /* An entry in an event ring */
 struct gsi_event {
 	__le64 xfer_ptr;
@@ -868,7 +872,7 @@ static int __gsi_channel_start(struct ipa_channel *channel, bool resume)
 }
 
 /* Start an allocated GSI channel */
-int gsi_channel_start(struct ipa_dma *gsi, u32 channel_id)
+static int gsi_channel_start(struct ipa_dma *gsi, u32 channel_id)
 {
 	struct ipa_channel *channel = &gsi->channel[channel_id];
 	int ret;
@@ -923,7 +927,7 @@ static int __gsi_channel_stop(struct ipa_channel *channel, bool suspend)
 }
 
 /* Stop a started channel */
-int gsi_channel_stop(struct ipa_dma *gsi, u32 channel_id)
+static int gsi_channel_stop(struct ipa_dma *gsi, u32 channel_id)
 {
 	struct ipa_channel *channel = &gsi->channel[channel_id];
 	int ret;
@@ -940,7 +944,7 @@ int gsi_channel_stop(struct ipa_dma *gsi, u32 channel_id)
 }
 
 /* Reset and reconfigure a channel, (possibly) enabling the doorbell engine */
-void gsi_channel_reset(struct ipa_dma *gsi, u32 channel_id, bool doorbell)
+static void gsi_channel_reset(struct ipa_dma *gsi, u32 channel_id, bool doorbell)
 {
 	struct ipa_channel *channel = &gsi->channel[channel_id];
 
@@ -1965,7 +1969,7 @@ err_irq_teardown:
 }
 
 /* Inverse of gsi_setup() */
-void gsi_teardown(struct ipa_dma *gsi)
+static void gsi_teardown(struct ipa_dma *gsi)
 {
 	gsi_channel_teardown(gsi);
 	gsi_irq_teardown(gsi);
@@ -2231,6 +2235,18 @@ int gsi_init(struct ipa_dma *gsi, struct platform_device *pdev,
 
 	gsi->dev = dev;
 	gsi->version = version;
+	gsi->setup = gsi_setup;
+	gsi->teardown = gsi_teardown;
+	gsi->exit = gsi_exit;
+	gsi->suspend = gsi_suspend;
+	gsi->resume = gsi_resume;
+	gsi->channel_tre_max = gsi_channel_tre_max;
+	gsi->channel_trans_tre_max = gsi_channel_trans_tre_max;
+	gsi->channel_start = gsi_channel_start;
+	gsi->channel_stop = gsi_channel_stop;
+	gsi->channel_reset = gsi_channel_reset;
+	gsi->channel_suspend = gsi_channel_suspend;
+	gsi->channel_resume = gsi_channel_resume;
 
 	/* GSI uses NAPI on all channels.  Create a dummy network device
 	 * for the channel NAPI contexts to be associated with.
@@ -2287,7 +2303,7 @@ err_iounmap:
 }
 
 /* Inverse of gsi_init() */
-void gsi_exit(struct ipa_dma *gsi)
+static void gsi_exit(struct ipa_dma *gsi)
 {
 	mutex_destroy(&gsi->mutex);
 	gsi_channel_exit(gsi);
@@ -2314,10 +2330,18 @@ void gsi_exit(struct ipa_dma *gsi)
  * substantially reduce pool memory requirements.  The number we
  * reduce it by matches the number added in ipa_trans_pool_init().
  */
-u32 gsi_channel_tre_max(struct ipa_dma *gsi, u32 channel_id)
+static u32 gsi_channel_tre_max(struct ipa_dma *gsi, u32 channel_id)
 {
 	struct ipa_channel *channel = &gsi->channel[channel_id];
 
 	/* Hardware limit is channel->tre_count - 1 */
 	return channel->tre_count - (channel->trans_tre_max - 1);
+}
+
+/* Returns the maximum number of TREs in a single transaction for a channel */
+static u32 gsi_channel_trans_tre_max(struct ipa_dma *gsi, u32 channel_id)
+{
+	struct ipa_channel *channel = &gsi->channel[channel_id];
+
+	return channel->tre_count;
 }

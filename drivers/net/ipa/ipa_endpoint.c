@@ -1155,7 +1155,7 @@ try_again_later:
 	 * If the hardware has no receive buffers queued, schedule work to
 	 * try replenishing again.
 	 */
-	if (gsi_channel_trans_idle(&endpoint->ipa->dma_subsys, endpoint->channel_id))
+	if (ipa_channel_trans_idle(&endpoint->ipa->dma_subsys, endpoint->channel_id))
 		schedule_delayed_work(&endpoint->replenish_work,
 				      msecs_to_jiffies(1));
 }
@@ -1165,7 +1165,7 @@ static void ipa_endpoint_replenish_enable(struct ipa_endpoint *endpoint)
 	set_bit(IPA_REPLENISH_ENABLED, endpoint->replenish_flags);
 
 	/* Start replenishing if hardware currently has no buffers */
-	if (gsi_channel_trans_idle(&endpoint->ipa->dma_subsys, endpoint->channel_id))
+	if (ipa_channel_trans_idle(&endpoint->ipa->dma_subsys, endpoint->channel_id))
 		ipa_endpoint_replenish(endpoint);
 }
 
@@ -1474,13 +1474,13 @@ static int ipa_endpoint_reset_rx_aggr(struct ipa_endpoint *endpoint)
 	 * active.  We'll re-enable the doorbell (if appropriate) when
 	 * we reset again below.
 	 */
-	gsi_channel_reset(gsi, endpoint->channel_id, false);
+	ipa_channel_reset(gsi, endpoint->channel_id, false);
 
 	/* Make sure the channel isn't suspended */
 	suspended = ipa_endpoint_program_suspend(endpoint, false);
 
 	/* Start channel and do a 1 byte read */
-	ret = gsi_channel_start(gsi, endpoint->channel_id);
+	ret = ipa_channel_start(gsi, endpoint->channel_id);
 	if (ret)
 		goto out_suspend_again;
 
@@ -1503,7 +1503,7 @@ static int ipa_endpoint_reset_rx_aggr(struct ipa_endpoint *endpoint)
 
 	gsi_trans_read_byte_done(gsi, endpoint->channel_id);
 
-	ret = gsi_channel_stop(gsi, endpoint->channel_id);
+	ret = ipa_channel_stop(gsi, endpoint->channel_id);
 	if (ret)
 		goto out_suspend_again;
 
@@ -1512,14 +1512,14 @@ static int ipa_endpoint_reset_rx_aggr(struct ipa_endpoint *endpoint)
 	 * complete the channel reset sequence.  Finish by suspending the
 	 * channel again (if necessary).
 	 */
-	gsi_channel_reset(gsi, endpoint->channel_id, true);
+	ipa_channel_reset(gsi, endpoint->channel_id, true);
 
 	usleep_range(USEC_PER_MSEC, 2 * USEC_PER_MSEC);
 
 	goto out_suspend_again;
 
 err_endpoint_stop:
-	(void)gsi_channel_stop(gsi, endpoint->channel_id);
+	(void)ipa_channel_stop(gsi, endpoint->channel_id);
 out_suspend_again:
 	if (suspended)
 		(void)ipa_endpoint_program_suspend(endpoint, true);
@@ -1546,7 +1546,7 @@ static void ipa_endpoint_reset(struct ipa_endpoint *endpoint)
 	if (special && ipa_endpoint_aggr_active(endpoint))
 		ret = ipa_endpoint_reset_rx_aggr(endpoint);
 	else
-		gsi_channel_reset(&ipa->dma_subsys, channel_id, true);
+		ipa_channel_reset(&ipa->dma_subsys, channel_id, true);
 
 	if (ret)
 		dev_err(&ipa->pdev->dev,
@@ -1594,7 +1594,7 @@ int ipa_endpoint_enable_one(struct ipa_endpoint *endpoint)
 	struct ipa_dma *gsi = &ipa->dma_subsys;
 	int ret;
 
-	ret = gsi_channel_start(gsi, endpoint->channel_id);
+	ret = ipa_channel_start(gsi, endpoint->channel_id);
 	if (ret) {
 		dev_err(&ipa->pdev->dev,
 			"error %d starting %cX channel %u for endpoint %u\n",
@@ -1633,7 +1633,7 @@ void ipa_endpoint_disable_one(struct ipa_endpoint *endpoint)
 	}
 
 	/* Note that if stop fails, the channel's state is not well-defined */
-	ret = gsi_channel_stop(gsi, endpoint->channel_id);
+	ret = ipa_channel_stop(gsi, endpoint->channel_id);
 	if (ret)
 		dev_err(&ipa->pdev->dev,
 			"error %d attempting to stop endpoint %u\n", ret,
@@ -1654,7 +1654,7 @@ void ipa_endpoint_suspend_one(struct ipa_endpoint *endpoint)
 		(void)ipa_endpoint_program_suspend(endpoint, true);
 	}
 
-	ret = gsi_channel_suspend(gsi, endpoint->channel_id);
+	ret = ipa_channel_suspend(gsi, endpoint->channel_id);
 	if (ret)
 		dev_err(dev, "error %d suspending channel %u\n", ret,
 			endpoint->channel_id);
@@ -1672,7 +1672,7 @@ void ipa_endpoint_resume_one(struct ipa_endpoint *endpoint)
 	if (!endpoint->toward_ipa)
 		(void)ipa_endpoint_program_suspend(endpoint, false);
 
-	ret = gsi_channel_resume(gsi, endpoint->channel_id);
+	ret = ipa_channel_resume(gsi, endpoint->channel_id);
 	if (ret)
 		dev_err(dev, "error %d resuming channel %u\n", ret,
 			endpoint->channel_id);
