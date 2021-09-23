@@ -73,3 +73,4 @@ obj-$(CONFIG_DRM_PANEL_MSM8916_GENERATED) += msm8916-generated/
 obj-$(CONFIG_DRM_PANEL_HIMAX_HX8399C_FHDPLUS) += panel-himax-hx8399c-fhdplus.o
 obj-$(CONFIG_DRM_PANELS_XIAOMI_MIDO) +=panels-xiaomi-mido.o
 obj-$(CONFIG_DRM_PANEL_ILI7807_FHD) += panel-ili7807-fhd.o
+obj-$(CONFIG_DRM_PANEL_OTM1911_FHD) += panel-otm1911-fhd.o
