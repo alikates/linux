@@ -120,30 +120,6 @@ static const struct ipa_gsi_endpoint_data ipa_endpoint_data[] = {
 	},
 };
 
-static struct ipa_interconnect_data ipa_interconnect_data[] = {
-	{
-		.name = "memory",
-		.peak_bandwidth	= 1200000,	/* 1200 MBps */
-		.average_bandwidth = 100000,	/* 100 MBps */
-	},
-	{
-		.name = "imem",
-		.peak_bandwidth	= 350000,	/* 350 MBps */
-		.average_bandwidth  = 0,	/* unused */
-	},
-	{
-		.name = "config",
-		.peak_bandwidth	= 40000,	/* 40 MBps */
-		.average_bandwidth = 0,		/* unused */
-	},
-};
-
-static struct ipa_power_data ipa_power_data = {
-	.core_clock_rate	= 200 * 1000 * 1000,	/* Hz */
-	.interconnect_count	= ARRAY_SIZE(ipa_interconnect_data),
-	.interconnect_data	= ipa_interconnect_data,
-};
-
 /* IPA-resident memory region configuration for v2.0 */
 static const struct ipa_mem ipa_mem_local_data_v2_0[] = {
 	{
@@ -221,13 +197,32 @@ static struct ipa_mem_data ipa_mem_data_v2_0 = {
 	.smem_size	= 0x00001f00,
 };
 
+static struct ipa_interconnect_data ipa_interconnect_data_v2_0[] = {
+	{
+		.name = "memory",
+		.peak_bandwidth	= 1300000,	/* 1300 MBps */
+		.average_bandwidth = 100000,	/* 100 MBps */
+	},
+	{
+		.name = "imem",
+		.peak_bandwidth	= 1300000,	/* 1300 MBps */
+		.average_bandwidth = 100000,	/* 100 MBps */
+	},
+};
+
+static struct ipa_power_data ipa_power_data_v2_0 = {
+	.core_clock_rate	= 200 * 1000 * 1000,	/* Hz */
+	.interconnect_count	= ARRAY_SIZE(ipa_interconnect_data_v2_0),
+	.interconnect_data	= ipa_interconnect_data_v2_0,
+};
+
 /* Configuration data for IPAv2.0 */
 const struct ipa_data ipa_data_v2_0  = {
 	.version	= IPA_VERSION_2_0,
 	.endpoint_count	= ARRAY_SIZE(ipa_endpoint_data),
 	.endpoint_data	= ipa_endpoint_data,
 	.mem_data	= &ipa_mem_data_v2_0,
-	.power_data	= &ipa_power_data,
+	.power_data	= &ipa_power_data_v2_0,
 };
 
 /* IPA-resident memory region configuration for v2.5 */
@@ -301,13 +296,33 @@ static struct ipa_mem_data ipa_mem_data_v2_5 = {
 	.smem_size	= 0x00002000,
 };
 
+static struct ipa_interconnect_data ipa_interconnect_data_v2_5[] = {
+	{
+		.name = "memory",
+		.peak_bandwidth	= 960000,	/* 960 MBps */
+		.average_bandwidth = 206000,	/* 206 MBps */
+	},
+	{
+		.name = "imem",
+		.peak_bandwidth = 960000,       /* 960 MBps */
+		.average_bandwidth = 206000,    /* 206 MBps */
+
+	},
+};
+
+static struct ipa_power_data ipa_power_data_v2_5 = {
+	.core_clock_rate	= 75 * 1000 * 1000,	/* Hz */
+	.interconnect_count	= ARRAY_SIZE(ipa_interconnect_data_v2_5),
+	.interconnect_data	= ipa_interconnect_data_v2_5,
+};
+
 /* Configuration data for IPAv2.5 */
 const struct ipa_data ipa_data_v2_5  = {
 	.version	= IPA_VERSION_2_5,
 	.endpoint_count	= ARRAY_SIZE(ipa_endpoint_data),
 	.endpoint_data	= ipa_endpoint_data,
 	.mem_data	= &ipa_mem_data_v2_5,
-	.power_data	= &ipa_power_data,
+	.power_data	= &ipa_power_data_v2_5,
 };
 
 /* IPA-resident memory region configuration for v2.6L */
@@ -381,6 +396,31 @@ static struct ipa_mem_data ipa_mem_data_v2_6L = {
 	.smem_size	= 0x00002000,
 };
 
+
+static struct ipa_interconnect_data ipa_interconnect_data_v2_6L[] = {
+	{
+		.name = "memory",
+		.peak_bandwidth	= 1200000,	/* 1200 MBps */
+		.average_bandwidth = 100000,	/* 100 MBps */
+	},
+	{
+		.name = "imem",
+		.peak_bandwidth	= 350000,	/* 350 MBps */
+		.average_bandwidth  = 0,	/* unused */
+	},
+	{
+		.name = "config",
+		.peak_bandwidth	= 40000,	/* 40 MBps */
+		.average_bandwidth = 0,		/* unused */
+	},
+};
+
+static struct ipa_power_data ipa_power_data_v2_6L = {
+	.core_clock_rate	= 75 * 1000 * 1000,	/* Hz */
+	.interconnect_count	= ARRAY_SIZE(ipa_interconnect_data_v2_6L),
+	.interconnect_data	= ipa_interconnect_data_v2_6L,
+};
+
 /* Configuration data for IPAv2.6L */
 const struct ipa_data ipa_data_v2_6L  = {
 	.version	= IPA_VERSION_2_6L,
@@ -389,5 +429,5 @@ const struct ipa_data ipa_data_v2_6L  = {
 	.endpoint_count	= ARRAY_SIZE(ipa_endpoint_data),
 	.endpoint_data	= ipa_endpoint_data,
 	.mem_data	= &ipa_mem_data_v2_6L,
-	.power_data	= &ipa_power_data,
+	.power_data	= &ipa_power_data_v2_6L,
 };
