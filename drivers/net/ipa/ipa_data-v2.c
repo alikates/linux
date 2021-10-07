@@ -145,58 +145,69 @@ static struct ipa_power_data ipa_power_data = {
 };
 
 /* IPA-resident memory region configuration for v2.0 */
-static const struct ipa_mem ipa_mem_local_data_v2_0[IPA_MEM_COUNT] = {
-	[IPA_MEM_UC_SHARED] = {
+static const struct ipa_mem ipa_mem_local_data_v2_0[] = {
+	{
+		.id		= IPA_MEM_UC_SHARED,
 		.offset         = 0,
 		.size           = 0x80,
 		.canary_count   = 0,
 	},
-	[IPA_MEM_V4_FILTER] = {
+	{
+		.id		= IPA_MEM_V4_FILTER,
 		.offset		= 0x0080,
 		.size		= 0x0058,
 		.canary_count	= 0,
 	},
-	[IPA_MEM_V6_FILTER] = {
+	{
+		.id		= IPA_MEM_V6_FILTER,
 		.offset		= 0x00e0,
 		.size		= 0x0058,
 		.canary_count	= 2,
 	},
-	[IPA_MEM_V4_ROUTE] = {
+	{
+		.id		= IPA_MEM_V4_ROUTE,
 		.offset		= 0x0140,
 		.size		= 0x002c,
 		.canary_count	= 2,
 	},
-	[IPA_MEM_V6_ROUTE] = {
+	{
+		.id		= IPA_MEM_V6_ROUTE,
 		.offset		= 0x0170,
 		.size		= 0x002c,
 		.canary_count	= 1,
 	},
-	[IPA_MEM_MODEM_HEADER] = {
+	{
+		.id		= IPA_MEM_MODEM_HEADER,
 		.offset		= 0x01a0,
 		.size		= 0x0140,
 		.canary_count	= 1,
 	},
-	[IPA_MEM_AP_HEADER] = {
+	{
+		.id		= IPA_MEM_AP_HEADER,
 		.offset		= 0x02e0,
 		.size		= 0x0048,
 		.canary_count	= 0,
 	},
-	[IPA_MEM_MODEM] = {
+	{
+		.id		= IPA_MEM_MODEM,
 		.offset		= 0x032c,
 		.size		= 0x0dcc,
 		.canary_count	= 1,
 	},
-	[IPA_MEM_V4_FILTER_AP] = {
+	{
+		.id		= IPA_MEM_V4_FILTER_AP,
 		.offset		= 0x10fc,
 		.size		= 0x0780,
 		.canary_count	= 1,
 	},
-	[IPA_MEM_V6_FILTER_AP] = {
+	{
+		.id		= IPA_MEM_V6_FILTER_AP,
 		.offset		= 0x187c,
 		.size		= 0x055c,
 		.canary_count	= 0,
 	},
-	[IPA_MEM_UC_INFO] = {
+	{
+		.id		= IPA_MEM_UC_INFO,
 		.offset		= 0x1ddc,
 		.size		= 0x0124,
 		.canary_count	= 1,
@@ -204,6 +215,7 @@ static const struct ipa_mem ipa_mem_local_data_v2_0[IPA_MEM_COUNT] = {
 };
 
 static struct ipa_mem_data ipa_mem_data_v2_0 = {
+	.local_count	= ARRAY_SIZE(ipa_mem_local_data_v2_0),
 	.local		= ipa_mem_local_data_v2_0,
 	.smem_id	= 497,
 	.smem_size	= 0x00001f00,
@@ -219,53 +231,63 @@ const struct ipa_data ipa_data_v2_0  = {
 };
 
 /* IPA-resident memory region configuration for v2.5 */
-static const struct ipa_mem ipa_mem_local_data_v2_5[IPA_MEM_COUNT] = {
-	[IPA_MEM_UC_SHARED] = {
+static const struct ipa_mem ipa_mem_local_data_v2_5[] = {
+	{
+		.id		= IPA_MEM_UC_SHARED,
 		.offset         = 0,
 		.size           = 0x80,
 		.canary_count   = 0,
 	},
-	[IPA_MEM_UC_INFO] = {
+	{
+		.id		= IPA_MEM_UC_INFO,
 		.offset		= 0x0080,
 		.size		= 0x0200,
 		.canary_count	= 0,
 	},
-	[IPA_MEM_V4_FILTER] = {
+	{
+		.id		= IPA_MEM_V4_FILTER,
 		.offset		= 0x0288,
 		.size		= 0x0058,
 		.canary_count	= 2,
 	},
-	[IPA_MEM_V6_FILTER] = {
+	{
+		.id		= IPA_MEM_V6_FILTER,
 		.offset		= 0x02e8,
 		.size		= 0x0058,
 		.canary_count	= 2,
 	},
-	[IPA_MEM_V4_ROUTE] = {
+	{
+		.id		= IPA_MEM_V4_ROUTE,
 		.offset		= 0x0348,
 		.size		= 0x003c,
 		.canary_count	= 2,
 	},
-	[IPA_MEM_V6_ROUTE] = {
+	{
+		.id		= IPA_MEM_V6_ROUTE,
 		.offset		= 0x0388,
 		.size		= 0x003c,
 		.canary_count	= 1,
 	},
-	[IPA_MEM_MODEM_HEADER] = {
+	{
+		.id		= IPA_MEM_MODEM_HEADER,
 		.offset		= 0x03c8,
 		.size		= 0x0140,
 		.canary_count	= 1,
 	},
-	[IPA_MEM_MODEM_PROC_CTX] = {
+	{
+		.id		= IPA_MEM_MODEM_PROC_CTX,
 		.offset		= 0x0510,
 		.size		= 0x0200,
 		.canary_count	= 2,
 	},
-	[IPA_MEM_AP_PROC_CTX] = {
+	{
+		.id		= IPA_MEM_AP_PROC_CTX,
 		.offset		= 0x0710,
 		.size		= 0x0200,
 		.canary_count	= 0,
 	},
-	[IPA_MEM_MODEM] = {
+	{
+		.id		= IPA_MEM_MODEM,
 		.offset		= 0x0914,
 		.size		= 0x16a8,
 		.canary_count	= 1,
@@ -273,6 +295,7 @@ static const struct ipa_mem ipa_mem_local_data_v2_5[IPA_MEM_COUNT] = {
 };
 
 static struct ipa_mem_data ipa_mem_data_v2_5 = {
+	.local_count	= ARRAY_SIZE(ipa_mem_local_data_v2_5),
 	.local		= ipa_mem_local_data_v2_5,
 	.smem_id	= 497,
 	.smem_size	= 0x00002000,
@@ -288,7 +311,7 @@ const struct ipa_data ipa_data_v2_5  = {
 };
 
 /* IPA-resident memory region configuration for v2.6L */
-static const struct ipa_mem ipa_mem_local_data_v2_6L[IPA_MEM_COUNT] = {
+static const struct ipa_mem ipa_mem_local_data_v2_6L[] = {
 	{
 		.id		= IPA_MEM_UC_SHARED,
 		.offset         = 0,
@@ -352,6 +375,7 @@ static const struct ipa_mem ipa_mem_local_data_v2_6L[IPA_MEM_COUNT] = {
 };
 
 static struct ipa_mem_data ipa_mem_data_v2_6L = {
+	.local_count	= ARRAY_SIZE(ipa_mem_local_data_v2_6L),
 	.local		= ipa_mem_local_data_v2_6L,
 	.smem_id	= 497,
 	.smem_size	= 0x00002000,
