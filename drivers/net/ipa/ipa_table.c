@@ -148,12 +148,20 @@ ipa_table_valid_one(struct ipa *ipa, enum ipa_mem_id mem_id, bool route)
 {
 	const struct ipa_mem *mem = ipa_mem_find(ipa, mem_id);
 	struct device *dev = &ipa->pdev->dev;
-	u32 size;
+	u32 size, size_base, filter_count;
+
+	if (ipa->version <= IPA_VERSION_2_6L) {
+		size_base = sizeof(__le32);
+		filter_count = 8 + IPA_FILTER_COUNT_MAX;
+	} else {
+		size_base = sizeof(__le64);
+		filter_count = 1 + IPA_FILTER_COUNT_MAX;
+	}
 
 	if (route)
-		size = IPA_ROUTE_COUNT_MAX * sizeof(__le64);
+		size = IPA_ROUTE_COUNT_MAX * size_base;
 	else
-		size = (1 + IPA_FILTER_COUNT_MAX) * sizeof(__le64);
+		size = filter_count * size_base;
 
 	if (!ipa_cmd_table_valid(ipa, mem, route))
 		return false;

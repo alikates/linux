@@ -1940,7 +1940,7 @@ u32 ipa_endpoint_init(struct ipa *ipa, u32 count,
 	}
 
 	if (ipa->version <= IPA_VERSION_2_6L)
-		filter_map = 0x1fffff;
+		filter_map = 0x3fff;
 
 	if (!ipa_filter_map_valid(ipa, filter_map))
 		goto err_endpoint_exit;

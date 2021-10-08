@@ -191,19 +191,21 @@ static bool ipa_mem_id_required(struct ipa *ipa, enum ipa_mem_id mem_id)
 	switch (mem_id) {
 	case IPA_MEM_UC_SHARED:
 	case IPA_MEM_UC_INFO:
-	case IPA_MEM_V4_FILTER_HASHED:
 	case IPA_MEM_V4_FILTER:
-	case IPA_MEM_V6_FILTER_HASHED:
 	case IPA_MEM_V6_FILTER:
-	case IPA_MEM_V4_ROUTE_HASHED:
 	case IPA_MEM_V4_ROUTE:
-	case IPA_MEM_V6_ROUTE_HASHED:
 	case IPA_MEM_V6_ROUTE:
 	case IPA_MEM_MODEM_HEADER:
 	case IPA_MEM_MODEM_PROC_CTX:
 	case IPA_MEM_AP_PROC_CTX:
 	case IPA_MEM_MODEM:
 		return true;
+
+	case IPA_MEM_V4_FILTER_HASHED:
+	case IPA_MEM_V6_FILTER_HASHED:
+	case IPA_MEM_V4_ROUTE_HASHED:
+	case IPA_MEM_V6_ROUTE_HASHED:
+		return ipa->version >= IPA_VERSION_3_0;
 
 	case IPA_MEM_PDN_CONFIG:
 	case IPA_MEM_STATS_QUOTA_MODEM:
@@ -220,6 +222,7 @@ static bool ipa_mem_valid_one(struct ipa *ipa, const struct ipa_mem *mem)
 	struct device *dev = &ipa->pdev->dev;
 	enum ipa_mem_id mem_id = mem->id;
 	u16 size_multiple;
+	u32 offset_alignment;
 
 	/* Make sure the memory region is valid for this version of IPA */
 	if (!ipa_mem_id_valid(ipa, mem_id)) {
@@ -232,12 +235,21 @@ static bool ipa_mem_valid_one(struct ipa *ipa, const struct ipa_mem *mem)
 		return false;
 	}
 
-	/* Other than modem memory, sizes must be a multiple of 8 */
-	size_multiple = mem_id == IPA_MEM_MODEM ? 4 : 8;
+	/*
+	 * Sizes must be a multiple of 4 for IPA v2.
+	 * Other than modem memory, sizes must be a multiple of 8 for IPA v3.
+	 */
+	size_multiple = mem_id == IPA_MEM_MODEM ||
+		ipa->version <= IPA_VERSION_2_6L ? 4 : 8;
+	/*
+	 * Offset should be 4-byte aligned for IPA v2, and 8-byte aligned
+	 * for IPA v3.
+	 */
+	offset_alignment = ipa->version <= IPA_VERSION_2_6L ? 4 : 8;
 	if (mem->size % size_multiple)
 		dev_err(dev, "region %u size not a multiple of %u bytes\n",
 			mem_id, size_multiple);
-	else if (mem->offset % 8)
+	else if (mem->offset % offset_alignment)
 		dev_err(dev, "region %u offset not 8-byte aligned\n", mem_id);
 	else if (mem->offset < mem->canary_count * sizeof(__le32))
 		dev_err(dev, "region %u offset too small for %hu canaries\n",
