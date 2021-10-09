@@ -317,16 +317,24 @@ static int ipa_filter_reset(struct ipa *ipa, bool modem)
 	if (ret)
 		return ret;
 
-	ret = ipa_filter_reset_table(ipa, IPA_MEM_V4_FILTER_HASHED, modem);
-	if (ret)
-		return ret;
+	if (ipa_table_hash_support(ipa)) {
+		ret = ipa_filter_reset_table(ipa, IPA_MEM_V4_FILTER_HASHED, modem);
+		if (ret)
+			return ret;
+	}
 
 	ret = ipa_filter_reset_table(ipa, IPA_MEM_V6_FILTER, modem);
 	if (ret)
 		return ret;
 	ret = ipa_filter_reset_table(ipa, IPA_MEM_V6_FILTER_HASHED, modem);
 
-	return ret;
+	if (ipa_table_hash_support(ipa)) {
+		ret = ipa_filter_reset_table(ipa, IPA_MEM_V6_FILTER_HASHED, modem);
+		if (ret)
+			return ret;
+	}
+
+	return 0;
 }
 
 /* The AP routes and modem routes are each contiguous within the
@@ -356,12 +364,14 @@ static int ipa_route_reset(struct ipa *ipa, bool modem)
 	}
 
 	ipa_table_reset_add(trans, false, first, count, IPA_MEM_V4_ROUTE);
-	ipa_table_reset_add(trans, false, first, count,
-			    IPA_MEM_V4_ROUTE_HASHED);
+	if (ipa_table_hash_support(ipa))
+		ipa_table_reset_add(trans, false, first, count,
+				    IPA_MEM_V4_ROUTE_HASHED);
 
 	ipa_table_reset_add(trans, false, first, count, IPA_MEM_V6_ROUTE);
-	ipa_table_reset_add(trans, false, first, count,
-			    IPA_MEM_V6_ROUTE_HASHED);
+	if (ipa_table_hash_support(ipa))
+		ipa_table_reset_add(trans, false, first, count,
+				    IPA_MEM_V6_ROUTE_HASHED);
 
 	ipa_trans_commit_wait(trans);
 
@@ -424,9 +434,10 @@ static void ipa_table_init_add(struct ipa_trans *trans, bool filter,
 	dma_addr_t hash_addr;
 	dma_addr_t addr;
 	u32 zero_offset;
-	u16 hash_count;
+	u16 hash_count = 0;
 	u32 zero_size;
 	u16 hash_size;
+	u32 hash_offset;
 	u16 count;
 	u16 size;
 
@@ -438,22 +449,26 @@ static void ipa_table_init_add(struct ipa_trans *trans, bool filter,
 		 * table is either the same as the non-hashed one, or zero.
 		 */
 		count = 1 + hweight32(ipa->filter_map);
-		hash_count = hash_mem->size ? count : 0;
+		if (hash_mem)
+			hash_count = hash_mem->size ? count : 0;
 	} else {
 		/* The size of a route table region determines the number
 		 * of entries it has.
 		 */
 		count = mem->size / IPA_TABLE_ENTRY_SIZE(ipa->version);
-		hash_count = hash_mem->size / IPA_TABLE_ENTRY_SIZE(ipa->version);
+		if (hash_mem)
+			hash_count = hash_mem->size
+					/ IPA_TABLE_ENTRY_SIZE(ipa->version);
 	}
 	size = count * IPA_TABLE_ENTRY_SIZE(ipa->version);
 	hash_size = hash_count * IPA_TABLE_ENTRY_SIZE(ipa->version);
+	hash_offset = hash_mem ? hash_mem->offset : 0;
 
 	addr = ipa_table_addr(ipa, filter, count);
 	hash_addr = ipa_table_addr(ipa, filter, hash_count);
 
 	ipa_cmd_table_init_add(trans, opcode, size, mem->offset, addr,
-			       hash_size, hash_mem->offset, hash_addr);
+			       hash_size, hash_offset, hash_addr);
 	if (!filter)
 		return;
 
