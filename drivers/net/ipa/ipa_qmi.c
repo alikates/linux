@@ -357,32 +357,26 @@ init_modem_driver_req(struct ipa_qmi *ipa_qmi)
 		req.zip_tbl_info.end = ipa->mem_offset + mem->size - 1;
 	}
 
-	mem = ipa_mem_find(ipa, IPA_MEM_V4_ROUTE_HASHED);
-	if (mem->size) {
+	if (ipa_table_hash_support(ipa)) {
+		mem = ipa_mem_find(ipa, IPA_MEM_V4_ROUTE_HASHED);
 		req.v4_hash_route_tbl_info_valid = 1;
 		req.v4_hash_route_tbl_info.start =
 				ipa->mem_offset + mem->offset;
 		req.v4_hash_route_tbl_info.count =
 				mem->size / IPA_TABLE_ENTRY_SIZE(ipa->version);
-	}
 
-	mem = ipa_mem_find(ipa, IPA_MEM_V6_ROUTE_HASHED);
-	if (mem->size) {
+		mem = ipa_mem_find(ipa, IPA_MEM_V6_ROUTE_HASHED);
 		req.v6_hash_route_tbl_info_valid = 1;
 		req.v6_hash_route_tbl_info.start =
-			ipa->mem_offset + mem->offset;
+				ipa->mem_offset + mem->offset;
 		req.v6_hash_route_tbl_info.count =
 				mem->size / IPA_TABLE_ENTRY_SIZE(ipa->version);
-	}
 
-	mem = ipa_mem_find(ipa, IPA_MEM_V4_FILTER_HASHED);
-	if (mem->size) {
+		mem = ipa_mem_find(ipa, IPA_MEM_V4_FILTER_HASHED);
 		req.v4_hash_filter_tbl_start_valid = 1;
 		req.v4_hash_filter_tbl_start = ipa->mem_offset + mem->offset;
-	}
 
-	mem = ipa_mem_find(ipa, IPA_MEM_V6_FILTER_HASHED);
-	if (mem->size) {
+		mem = ipa_mem_find(ipa, IPA_MEM_V6_FILTER_HASHED);
 		req.v6_hash_filter_tbl_start_valid = 1;
 		req.v6_hash_filter_tbl_start = ipa->mem_offset + mem->offset;
 	}
