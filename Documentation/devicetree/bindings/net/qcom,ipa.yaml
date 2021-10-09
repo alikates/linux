@@ -103,6 +103,9 @@ properties:
     oneOf:
       - items:
           - const: memory
+          - const: imem
+      - items:
+          - const: memory
           - const: config
       - items:
           - const: memory
