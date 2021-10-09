@@ -107,7 +107,9 @@ int ipa_mem_setup(struct ipa *ipa)
 	ipa_mem_zero_region_add(trans, IPA_MEM_AP_PROC_CTX);
 	ipa_mem_zero_region_add(trans, IPA_MEM_MODEM);
 
-	ipa_mem_zero_region_add(trans, IPA_MEM_ZIP);
+	/* Only IPA v2.6L has the compression/decompression region */
+	if (ipa->version == IPA_VERSION_2_6L)
+		ipa_mem_zero_region_add(trans, IPA_MEM_ZIP);
 
 	ipa_trans_commit_wait(trans);
 
