@@ -93,14 +93,16 @@
 			#size-cells = <0>;
 		};
 
-		qcom_smbcharger {
-			compatible = "qcom,pmi8950-charger";
-			status = "disabled";
-		};
-
-		charger@1000 {
+		qcom_smbcharger: smbchager@1000 {
+			compatible = "qcom,pmi8950-smbcharger";
 			reg = <0x1000>;
-			//FIXME: Add interrupts
+			interrupts = <2 0x11 0 IRQ_TYPE_NONE>,
+				<2 0x11 1 IRQ_TYPE_NONE>,
+				<2 0x11 3 IRQ_TYPE_NONE>,
+				<2 0x13 2 IRQ_TYPE_NONE>;
+			interrupt-names = "otg-fail", "otg-oc", "usbid-change",  "usb-change";
+
+			fuel-gauge = <&pmi8950_fg>;
 		};
 
 		otg@1100 {
