@@ -15,6 +15,7 @@
 #include "pmi8950.dtsi"
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/leds/common.h>
 
 / {
 	model = "Xiaomi Mi A2 Lite";
@@ -230,6 +231,51 @@
 		#sound-dai-cells = <0>;
 
 		reset-gpios = <&msmgpio 89 0>;
+	};
+
+	aw2013@45 {
+		compatible = "awinic,aw2013";
+		reg = <0x45>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		vcc-supply = <&pm8953_l5>;
+
+		led@0 {
+			reg = <0>;
+			led-max-microamp = <5000>;
+			color = <LED_COLOR_ID_WHITE>;
+			function = LED_FUNCTION_INDICATOR;
+		};
+	};
+};
+
+&flash_leds {
+	status = "okay";
+
+	flash-boost-supply = <&pm8953_l5>;
+	torch-boost-supply = <&pm8953_l5>;
+
+	flash {
+		led-sources = <0>;
+		function = LED_FUNCTION_FLASH;
+		color = <LED_COLOR_ID_WHITE>;
+		led-max-microamp = <200000>;
+		flash-max-microamp = <1000000>;
+		default-state = "off";
+		flash-max-timeout-us =<1280000>;
+		qcom,clamp-curr = <200000>;
+	};
+
+	torch {
+		led-sources = <0>;
+		function = LED_FUNCTION_TORCH;
+		color = <LED_COLOR_ID_WHITE>;
+		led-max-microamp = <200000>;
+		flash-max-microamp = <1000000>;
+		default-state = "off";
+		flash-max-timeout-us =<1280000>;
+		qcom,clamp-curr = <200000>;
 	};
 };
 
