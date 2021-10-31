@@ -5,6 +5,7 @@
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/input/linux-event-codes.h>
 #include <dt-bindings/spmi/spmi.h>
+#include <dt-bindings/leds/leds-qcom-spmi-flash.h>
 
 &spmi_bus {
 	pmic@2 {
@@ -215,8 +216,9 @@
 
 		};
 
-		flash_leds@d300 {
-			compatible = "qcom,flash-leds";
+		flash_leds: flash_leds@d300 {
+			compatible = "qcom,spmi-flash";
+			reg = <0xd300 0x100>;
 			status = "disabled";
 		};
 
