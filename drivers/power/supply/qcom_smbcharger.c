@@ -143,6 +143,7 @@ struct smbchg_chip {
 
 	int otg_resets;
 
+	spinlock_t sec_access_lock;
 	struct work_struct otg_reset_work;
 };
 
@@ -150,6 +151,36 @@ struct smbchg_irq {
 	const char *name;
 	irq_handler_t handler;
 };
+
+static int smbchg_sec_write(struct smbchg_chip *chip, u8 *val, u16 addr, int len)
+{
+	u8 sec_addr_val = 0xa5;
+	int ret;
+
+	ret = regmap_bulk_write(chip->regmap,
+			((chip->base + addr) & 0xff00) | 0xd0,
+			&sec_addr_val, 1);
+	if (ret)
+		return ret;
+
+	return regmap_bulk_write(chip->regmap, chip->base + addr, val, len);
+}
+
+/* TODO: Use and remove __maybe_unused */
+static __maybe_unused int smbchg_sec_masked_write(struct smbchg_chip *chip, u16 addr, u8 mask, u8 val)
+{
+	u8 reg;
+	int ret;
+
+	ret = regmap_bulk_read(chip->regmap, chip->base + addr, &reg, 1);
+	if (ret)
+		return ret;
+
+	reg &= ~mask;
+	reg |= val & mask;
+
+	return smbchg_sec_write(chip, &reg, addr, 1);
+}
 
 static int smbchg_otg_enable(struct regulator_dev *rdev)
 {
@@ -620,6 +651,7 @@ static int smbchg_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	spin_lock_init(&chip->sec_access_lock);
 	INIT_WORK(&chip->otg_reset_work, smbchg_otg_reset_worker);
 
 	/* Interrupts */
