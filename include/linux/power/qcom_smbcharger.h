@@ -1,0 +1,359 @@
+/* Registers */
+/* CHGR */
+#define SMBCHG_CHGR_FV_STS 0x0c
+#define SMBCHG_CHGR_STS 0x0e
+#define SMBCHG_CHGR_RT_STS 0x10
+#define SMBCHG_CHGR_FCC_CFG 0xf2
+#define SMBCHG_CHGR_FCC_CMP_CFG 0xf3
+#define SMBCHG_CHGR_VFLOAT_CFG 0xf4
+#define SMBCHG_CHGR_FV_CMP 0xf5
+#define SMBCHG_CHGR_AFVC_CFG 0xf6
+#define SMBCHG_CHGR_CHG_INHIB_CFG 0xf7
+#define SMBCHG_CHGR_TCC_CFG 0xf9
+#define SMBCHG_CHGR_CCMP_CFG 0xfa
+#define SMBCHG_CHGR_CFG1 0xfb
+#define SMBCHG_CHGR_CFG2 0xfc
+#define SMBCHG_CHGR_SFT_CFG 0xfd
+#define SMBCHG_CHGR_CFG 0xff
+
+/* OTG */
+#define SMBCHG_OTG_RT_STS 0x110
+#define SMBCHG_OTG_OTG_CFG 0x1f1
+#define SMBCHG_OTG_TRIM6 0x1f6
+#define SMBCHG_OTG_LOW_PWR_OPTIONS 0x1ff
+
+/* BAT-IF */
+#define SMBCHG_BAT_IF_BAT_PRES_STS 0x208
+#define SMBCHG_BAT_IF_RT_STS 0x210
+#define SMBCHG_BAT_IF_CMD_CHG 0x242
+#define SMBCHG_BAT_IF_CMD_CHG_LED 0x243
+#define SMBCHG_BAT_IF_BM_CFG 0x2f3
+#define SMBCHG_BAT_IF_BAT_IF_TRIM7 0x2f7
+#define SMBCHG_BAT_IF_BB_CLMP_SEL 0x2f8
+#define SMBCHG_BAT_IF_ZIN_ICL_PT 0x2fc
+#define SMBCHG_BAT_IF_ZIN_ICL_LV 0x2fd
+#define SMBCHG_BAT_IF_ZIN_ICL_HV 0x2fe
+
+/* USB-CHGPTH */
+#define SMBCHG_USB_CHGPTH_ICL_STS_1 0x307
+#define SMBCHG_USB_CHGPTH_PWR_PATH 0x308
+#define SMBCHG_USB_CHGPTH_ICL_STS_2 0x309
+#define SMBCHG_USB_CHGPTH_RID_STS 0x30b
+#define SMBCHG_USB_CHGPTH_USBIN_HVDCP_STS 0x30c
+#define SMBCHG_USB_CHGPTH_INPUT_STS 0x30d
+#define SMBCHG_USB_CHGPTH_USBID_MSB 0x30e
+#define SMBCHG_USB_CHGPTH_RT_STS 0x310
+#define SMBCHG_USB_CHGPTH_CMD_IL 0x340
+#define SMBCHG_USB_CHGPTH_CMD_APSD 0x341
+#define SMBCHG_USB_CHGPTH_CMD_HVDCP_1 0x342
+#define SMBCHG_USB_CHGPTH_CMD_HVDCP_2 0x343
+#define SMBCHG_USB_CHGPTH_USBIN_CHGR_CFG 0x3f1
+#define SMBCHG_USB_CHGPTH_IL_CFG 0x3f2
+#define SMBCHG_USB_CHGPTH_AICL_CFG 0x3f3
+#define SMBCHG_USB_CHGPTH_CHGPTH_CFG 0x3f4
+#define SMBCHG_USB_CHGPTH_APSD_CFG 0x3f5
+#define SMBCHG_USB_CHGPTH_TR_RID 0x3fa
+#define SMBCHG_USB_CHGPTH_ICL_BUF_CONFIG 0x3fc
+#define SMBCHG_USB_CHGPTH_TR_8OR32B 0x3fe
+
+/* DC-CHGPTH */
+#define SMBCHG_DC_CHGPTH_RT_STS 0x410
+#define SMBCHG_DC_CHGPTH_IL_CFG 0x4f2
+#define SMBCHG_DC_CHGPTH_AICL_CFG 0x4f3
+#define SMBCHG_DC_CHGPTH_AICL_WL_SEL_CFG 0x4f5
+
+/* MISC */
+#define SMBCHG_MISC_REVISION1 0x600
+#define SMBCHG_MISC_IDEV_STS 0x608
+#define SMBCHG_MISC_RT_STS 0x610
+#define SMBCHG_MISC_TEST 0x6e2
+#define SMBCHG_MISC_NTC_VOUT_CFG 0x6f3
+#define SMBCHG_MISC_TRIM_OPT_15_8 0x6f5
+#define SMBCHG_MISC_TRIM_OPT_7_0 0x6f6
+#define SMBCHG_MISC_TRIM_14 0x6fe
+
+/* TODO: Sort bits and bitmasks */
+
+#define RID_MASK GENMASK(3, 0)
+
+#define FMB_STS_MASK GENMASK(3, 0)
+
+#define BB_LOOP_DISABLE_ICL BIT(2)
+
+/* CHGR_STS values */
+#define CHG_HOLD_OFF_BIT BIT(3)
+#define CHG_TYPE_MASK GENMASK(2, 1)
+#define CHG_TYPE_SHIFT 1
+#define BATT_NOT_CHG_VAL 0x0
+#define BATT_PRE_CHG_VAL 0x1
+#define BATT_FAST_CHG_VAL 0x2
+#define BATT_TAPER_CHG_VAL 0x3
+
+/* CHGR_RT_STS bits */
+#define CHG_INHIBIT_BIT BIT(1)
+#define BAT_TCC_REACHED_BIT BIT(7)
+
+/* BAT_IF_RT_STS bits */
+#define HOT_BAT_HARD_BIT BIT(0)
+#define HOT_BAT_SOFT_BIT BIT(1)
+#define COLD_BAT_HARD_BIT BIT(2)
+#define COLD_BAT_SOFT_BIT BIT(3)
+#define BAT_OV_BIT BIT(4)
+#define BAT_LOW_BIT BIT(5)
+#define BAT_MISSING_BIT BIT(6)
+#define BAT_TERM_MISSING_BIT BIT(7)
+
+/* USB_CHGPTH_RT_STS bits */
+#define USBIN_OV_BIT BIT(1)
+#define USBIN_SRC_DET_BIT BIT(2)
+
+#define USBIN_9V BIT(5)
+#define USBIN_UNREG BIT(4)
+#define USBIN_LV BIT(3)
+
+#define SMBCHG_NUM_OTG_RESET_RETRIES 5
+#define USBID_GND_THRESHOLD 0x495
+
+/* USB_CHGPTH_CHGPTH_CFG bits */
+#define SUSPEND_CURRENT_MA 2
+#define CFG_USB_2_3_SEL_BIT BIT(7)
+#define CFG_USB_2 0
+#define CFG_USB_3 BIT(7)
+#define USB51_COMMAND_POL BIT(2)
+#define USB51AC_CTRL BIT(1)
+
+/* SMBCHG_USB_CHGPTH_IL_CFG bits */
+#define USBIN_INPUT_MASK GENMASK(4, 0)
+#define USBIN_MODE_CHG_BIT BIT(0)
+#define USBIN_HC_MODE BIT(0)
+
+/* SMBCHG_USB_CHGPTH_CMD_IL bits */
+#define ICL_OVERRIDE_BIT BIT(2)
+#define USBIN_SUSPEND_BIT BIT(4)
+#define USB51_MODE_BIT BIT(1)
+#define USB51_100MA 0
+#define USB51_500MA BIT(1)
+#define USE_REGISTER_FOR_CURRENT BIT(2)
+
+#define USBIN_LIMITED_MODE 0
+
+/* SMBCHG_MISC_IDEV_STS fields */
+#define N_TYPE_BITS 4
+#define TYPE_BITS_OFFSET 4
+
+#define CHG_ITERM_MASK GENMASK(2, 0)
+
+/* Default current for each usb port type */
+#define DEFAULT_SDP_MA 500
+#define DEFAULT_DCP_MA 1000
+#define DEFAULT_CDP_MA 1500
+
+
+
+#define CHG_COMP_SFT_BIT BIT(3)
+
+/* SMBCHG_BAT_IF_CMD_CHG vits */
+#define EN_BAT_CHG_BIT BIT(1)
+#define OTG_EN_BIT BIT(0)
+
+/* SMBCHG_CHGR_CFG2 bits */
+#define CHG_EN_SRC_BIT BIT(7)
+#define CHG_EN_POLARITY_BIT BIT(6)
+#define P2F_CHG_TRAN BIT(5)
+#define I_TERM_BIT BIT(3)
+#define AUTO_RECHG_BIT BIT(2)
+#define CHARGER_INHIBIT_BIT BIT(0)
+
+/* SMBCHG_CHGR_CFG2 values */
+#define TERM_I_SRC_BIT BIT(2)
+#define TERM_SRC_FG BIT(2)
+#define RECHG_THRESHOLD_SRC_BIT BIT(1)
+
+
+#define VFLOAT_MASK GENMASK(5, 0)
+#define CHG_INHIBIT_MASK 0x03
+
+#define RCHG_LVL_BIT BIT(0)
+
+/* Current tables */
+static const int iterm_ma_table_8994[] = {
+	300,
+	50,
+	100,
+	150,
+	200,
+	250,
+	500,
+	600
+};
+
+static const int iterm_ma_table_8996[] = {
+	300,
+	50,
+	100,
+	150,
+	200,
+	250,
+	400,
+	500
+};
+
+static const int usb_ilim_ma_table_8994[] = {
+	300,
+	400,
+	450,
+	475,
+	500,
+	550,
+	600,
+	650,
+	700,
+	900,
+	950,
+	1000,
+	1100,
+	1200,
+	1400,
+	1450,
+	1500,
+	1600,
+	1800,
+	1850,
+	1880,
+	1910,
+	1930,
+	1950,
+	1970,
+	2000,
+	2050,
+	2100,
+	2300,
+	2400,
+	2500,
+	3000
+};
+
+static const int usb_ilim_ma_table_8996[] = {
+	300,
+	400,
+	500,
+	600,
+	700,
+	800,
+	900,
+	1000,
+	1100,
+	1200,
+	1300,
+	1400,
+	1450,
+	1500,
+	1550,
+	1600,
+	1700,
+	1800,
+	1900,
+	1950,
+	2000,
+	2050,
+	2100,
+	2200,
+	2300,
+	2400,
+	2500,
+	2600,
+	2700,
+	2800,
+	2900,
+	3000
+};
+
+static const int dc_ilim_ma_table_8994[] = {
+	300,
+	400,
+	450,
+	475,
+	500,
+	550,
+	600,
+	650,
+	700,
+	900,
+	950,
+	1000,
+	1100,
+	1200,
+	1400,
+	1450,
+	1500,
+	1600,
+	1800,
+	1850,
+	1880,
+	1910,
+	1930,
+	1950,
+	1970,
+	2000,
+};
+
+static const int dc_ilim_ma_table_8996[] = {
+	300,
+	400,
+	500,
+	600,
+	700,
+	800,
+	900,
+	1000,
+	1100,
+	1200,
+	1300,
+	1400,
+	1450,
+	1500,
+	1550,
+	1600,
+	1700,
+	1800,
+	1900,
+	1950,
+	2000,
+	2050,
+	2100,
+	2200,
+	2300,
+	2400,
+};
+
+static const int fcc_comp_table_8994[] = {
+	250,
+	700,
+	900,
+	1200,
+};
+
+static const int fcc_comp_table_8996[] = {
+	250,
+	1100,
+	1200,
+	1500,
+};
+
+static const int aicl_rerun_period[] = {
+	45,
+	90,
+	180,
+	360,
+};
+
+static const int aicl_rerun_period_schg_lite[] = {
+	3,	/* 2.8s  */
+	6,	/* 5.6s  */
+	11,	/* 11.3s */
+	23,	/* 22.5s */
+	45,
+	90,
+	180,
+	360,
+};
