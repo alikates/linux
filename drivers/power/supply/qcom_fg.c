@@ -481,6 +481,7 @@ static int qcom_fg_get_capacity(struct qcom_fg_chip *chip, int *val)
 {
 	u8 cap[2];
 	int ret;
+	union power_supply_propval batt_full;
 
 	ret = qcom_fg_read(chip, cap, BATT_MONOTONIC_SOC, 2);
 	if (ret) {
@@ -493,6 +494,15 @@ static int qcom_fg_get_capacity(struct qcom_fg_chip *chip, int *val)
 	}
 
 	*val = DIV_ROUND_CLOSEST((cap[0] - 1) * 98, 0xff - 2) + 1;
+
+
+	ret = power_supply_get_property(chip->chg_psy, POWER_SUPPLY_PROP_STATUS, &batt_full);
+	if (ret) {
+		dev_err(chip->dev, "Failed to read battery charger status: %d", ret);
+	}
+	if(batt_full.intval == POWER_SUPPLY_STATUS_FULL) {
+		*val = 100;
+	}
 
 	return 0;
 }
