@@ -260,7 +260,7 @@
 		interleave_mode = <0>;
 		#sound-dai-cells = <0>;
 
-		reset-gpios = <&msmgpio 89 0>;
+		reset-gpios = <&msmgpio 89 GPIO_ACTIVE_LOW>;
 	};
 };
 
