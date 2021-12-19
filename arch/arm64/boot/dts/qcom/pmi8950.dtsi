@@ -215,8 +215,9 @@
 
 		};
 
-		flash_leds@d300 {
-			compatible = "qcom,flash-leds";
+		flash_leds: flash_leds@d300 {
+			compatible = "qcom,spmi-flash-leds";
+				reg = <0xd300 0x100>;
 			status = "disabled";
 		};
 
