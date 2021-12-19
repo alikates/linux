@@ -70,6 +70,20 @@
 		};
 	};
 
+	battery: battery {
+		compatible = "simple-battery";
+		charge-full-design-microamp-hours = <4000000>;
+		voltage-min-design-microvolt = <3400000>;
+		voltage-max-design-microvolt = <4400000>;
+	};
+};
+
+&pmi8950_fg {
+	monitored-battery = <&battery>;
+};
+
+&pmi8950_smbcharger {
+	monitored-battery = <&battery>;
 };
 
 &usb3 {
