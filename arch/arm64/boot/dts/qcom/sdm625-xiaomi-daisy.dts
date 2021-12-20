@@ -76,6 +76,23 @@
 		voltage-min-design-microvolt = <3400000>;
 		voltage-max-design-microvolt = <4400000>;
 	};
+
+	sensors: i2c@0 {
+		compatible = "i2c-gpio";
+		sda-gpios = <&msmgpio 14 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 15 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		i2c-gpio,delay-us = <2>;        /* ~100 kHz */
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		lsm6dsl@6a {
+			compatible = "st,lsm6dsl";
+			reg = <0x6a>;
+			mount-matrix = "-1", "0", "0",
+					"0", "-1", "0",
+					"0", "0", "1";
+		};
+	};
 };
 
 &pmi8950_fg {
