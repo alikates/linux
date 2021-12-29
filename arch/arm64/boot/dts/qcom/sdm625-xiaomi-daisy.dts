@@ -273,8 +273,6 @@
 
 	model = "xiaomi-daisy";
 
-	model = "xiaomi-mi-a2-lite";
-
 	quinary-mi2s-dai-link {
 		link-name = "Quinary MI2S";
 		cpu {
