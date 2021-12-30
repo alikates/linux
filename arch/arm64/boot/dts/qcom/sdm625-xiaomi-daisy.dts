@@ -273,8 +273,6 @@
 
 	model = "xiaomi-daisy";
 
-	model = "xiaomi-mi-a2-lite";
-
 	quinary-mi2s-dai-link {
 		link-name = "Quinary MI2S";
 		cpu {
@@ -292,9 +290,9 @@
 };
 
 &q6afedai {
-	dai@22 {
+	dai@127 {
 		reg = <QUINARY_MI2S_RX>;
-		qcom,sd-lines = <1>;
+		qcom,sd-lines = <0>;
 	};
 };
 
