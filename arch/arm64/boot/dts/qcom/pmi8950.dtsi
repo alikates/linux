@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/* Copyright (c) 2022, The Linux Foundation. All rights reserved.
+ */
+#include <dt-bindings/iio/qcom,spmi-vadc.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/input/linux-event-codes.h>
+#include <dt-bindings/spmi/spmi.h>
+
+&spmi_bus {
+	pmic@2 {
+		compatible = "qcom,pmi8950", "qcom,spmi-pmic";
+		reg = <2 SPMI_USID>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+
+	pmi8950@3 {
+		compatible = "qcom,pmi8950", "qcom,spmi-pmic";
+		reg = <3 SPMI_USID>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		pmi8950_wled: wled@d800 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			compatible = "qcom,pmi8998-wled";
+
+			reg = <0xd800>, <0xd900>;
+
+			interrupts = <3 0xd8 0x02 IRQ_TYPE_EDGE_RISING>;
+			interrupt-names = "short";
+
+			qcom,current-boost-limit = <970>;
+			qcom,current-limit-microamp = <20000>;
+			qcom,ovp-millivolt = <29600>;
+			qcom,switching-freq = <800>;
+			qcom,enabled-strings = <0 1 2 3>;
+			qcom,num-strings = <4>;
+
+			status = "disabled";
+
+		};
+	};
+};

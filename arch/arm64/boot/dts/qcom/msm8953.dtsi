@@ -211,7 +211,7 @@
 		method = "smc";
 	};
 
-	reserved-memory {
+	reserved_memory: reserved-memory {
 		#address-cells = <2>;
 		#size-cells = <2>;
 		ranges;
@@ -223,7 +223,7 @@
 		};
 
 		memory@85b00000 {
-			reg = <0x0 0x85b00000 0x0 0x800000>;
+			reg = <0x0 0x84A00000 0x0 0x1900000>;
 			no-map;
 		};
 
@@ -1175,12 +1175,12 @@
 			polling-delay = <1000>;
 			thermal-sensors = <&tsens0 12>;
 			trips {
-				cpu12_alert: trip-point0 {
+				cpu3_alert: trip-point0 {
 					temperature = <80000>;
 					hysteresis = <2000>;
 					type = "passive";
 				};
-				cpu12_crit: crit {
+				cpu3_crit: crit {
 					temperature = <100000>;
 					hysteresis = <2000>;
 					type = "critical";
