@@ -14,6 +14,7 @@ properties:
   compatible:
     enum:
       - qcom,msm8916-cci
+      - qcom,msm8953-cci
       - qcom,msm8974-cci
       - qcom,msm8996-cci
       - qcom,sdm845-cci
