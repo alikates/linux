@@ -900,6 +900,30 @@ fail:
 	return ret;
 }
 
+static int mdp5_bind(struct device *dev, struct device *master, void *data)
+{
+	struct msm_drm_private *priv = dev_get_drvdata(master);
+	struct drm_device *ddev = priv->dev;
+	struct platform_device *pdev = to_platform_device(dev);
+
+	DBG("");
+
+	return mdp5_init(pdev, ddev);
+}
+
+static void mdp5_unbind(struct device *dev, struct device *master,
+			void *data)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+
+	mdp5_destroy(pdev);
+}
+
+static const struct component_ops mdp5_ops = {
+	.bind   = mdp5_bind,
+	.unbind = mdp5_unbind,
+};
+
 static int mdp5_setup_interconnect(struct platform_device *pdev)
 {
 	/* Interconnects are a part of MDSS device tree binding, not the
@@ -907,6 +931,7 @@ static int mdp5_setup_interconnect(struct platform_device *pdev)
 	struct device *mdss_dev = pdev->dev.parent;
 	struct icc_path *path0 = of_icc_get(mdss_dev, "mdp0-mem");
 	struct icc_path *path1 = of_icc_get(mdss_dev, "mdp1-mem");
+	struct icc_path *path_cfg = of_icc_get(mdss_dev, "cpu-cfg");
 	struct icc_path *path_rot = of_icc_get(mdss_dev, "rotator-mem");
 
 	if (IS_ERR(path0))
@@ -929,6 +954,8 @@ static int mdp5_setup_interconnect(struct platform_device *pdev)
 		icc_set_bw(path1, 0, MBps_to_icc(6400));
 	if (!IS_ERR_OR_NULL(path_rot))
 		icc_set_bw(path_rot, 0, MBps_to_icc(6400));
+	if (!IS_ERR_OR_NULL(path_cfg))
+		icc_set_bw(path_cfg, 0, MBps_to_icc(500));
 
 	return 0;
 }
