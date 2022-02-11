@@ -3,6 +3,7 @@
 /dts-v1/;
 
 #include "msm8953-pm8953.dtsi"
+#include <dt-bindings/clock/qcom,rpmcc.h>
 
 / {
 	model = "Xiaomi Mi A2 Lite";
@@ -75,6 +76,13 @@
 		};
 	};
 
+	vph_pwr: vph-pwr-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vph_pwr";
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
 	sensors: i2c@0 {
 		compatible = "i2c-gpio";
 		sda-gpios = <&tlmm 14 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
@@ -89,7 +97,17 @@
 			mount-matrix = "-1", "0", "0",
 					"0", "-1", "0",
 					"0", "0", "1";
+
+			vdd-supply = <&pm8953_l10>;
+			vddio-supply = <&pm8953_l6>;
 		};
+	};
+
+	battery: battery {
+		compatible = "simple-battery";
+		charge-full-design-microamp-hours = <4000000>;
+		voltage-min-design-microvolt = <3400000>;
+		voltage-max-design-microvolt = <4400000>;
 	};
 };
 
@@ -125,6 +143,9 @@
 		iovcc-supply = <&pm8953_l6>;
 
 		reset-gpios = <&tlmm 64 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default","sleep";
+        pinctrl-0 = <&ts_int_active &ts_reset_active>;
+        pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
 
 		touchscreen-size-x = <1080>;
 		touchscreen-size-y = <2280>;
@@ -151,7 +172,18 @@
 };
 
 &smd_rpm_regulators {
-	// TODO: supplies
+	vdd_s1-supply = <&vph_pwr>;
+	vdd_s2-supply = <&vph_pwr>;
+	vdd_s3-supply = <&vph_pwr>;
+	vdd_s4-supply = <&vph_pwr>;
+	vdd_s5-supply = <&vph_pwr>;
+	vdd_s6-supply = <&vph_pwr>;
+	vdd_s7-supply = <&vph_pwr>;
+	vdd_l1-supply = <&pm8953_s3>;
+	vdd_l2_l3-supply = <&pm8953_s3>;
+	vdd_l4_l5_l6_l7_l16_l19-supply = <&pm8953_s4>;
+	vdd_l8_l11_l12_l13_l14_l15-supply = <&vph_pwr>;
+	vdd_l9_l10_l17_l18_l22-supply = <&vph_pwr>;
 
 	s1 {
 		regulator-min-microvolt = <863000>;
@@ -256,6 +288,67 @@
 
 &tlmm {
 	gpio-reserved-ranges = <0 4>, <16 4>, <135 4>;
+
+	/* add pingrp for touchscreen */
+	pmx_ts_int_active {
+		ts_int_active: ts_int_active {
+			mux {
+				pins = "gpio65";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio65";
+				drive-strength = <8>;
+				bias-pull-up;
+			};
+		};
+	};
+
+	pmx_ts_int_suspend {
+		ts_int_suspend: ts_int_suspend {
+			mux {
+				pins = "gpio65";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio65";
+				drive-strength = <2>;
+				bias-pull-down;
+			};
+		};
+	};
+
+	pmx_ts_reset_active {
+			ts_reset_active: ts_reset_active {
+				mux {
+					pins = "gpio64";
+					function = "gpio";
+				};
+
+				config {
+					pins = "gpio64";
+					drive-strength = <8>;
+					bias-pull-up;
+				};
+			};
+		};
+
+		pmx_ts_reset_suspend {
+			ts_reset_suspend: ts_reset_suspend {
+				mux {
+					pins = "gpio64";
+					function = "gpio";
+				};
+
+				config {
+					pins = "gpio64";
+					drive-strength = <2>;
+					bias-pull-down;
+				};
+			};
+		};
 };
 
 &usb3 {
@@ -264,4 +357,77 @@
 
 &usb3_dwc3 {
 	dr_mode = "peripheral";
+};
+
+&spmi_bus {
+	pmic@2 {
+		compatible = "qcom,pmi8950", "qcom,spmi-pmic";
+		reg = <2 SPMI_USID>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		pmi8950_smbcharger: smbchager@1000 {
+			compatible = "qcom,pmi8950-smbcharger";
+			reg = <0x1000>;
+			status = "okay";
+			interrupts = <2 0x11 0 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x11 1 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x11 3 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x13 2 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 0 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 1 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 2 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 3 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 4 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 5 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 6 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x10 7 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 0 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 1 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 2 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 3 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 4 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 5 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 6 IRQ_TYPE_EDGE_BOTH>,
+					<2 0x12 7 IRQ_TYPE_EDGE_BOTH>;
+			interrupt-names = "otg-fail",
+					"otg-oc",
+					"usbid-change",
+					"usbin-src-det",
+					"chg-error",
+					"chg-inhibit",
+					"chg-p2f-thr",
+					"chg-rechg-thr",
+					"chg-taper-thr",
+					"chg-tcc-thr",
+					"batt-hot",
+					"batt-warm",
+					"batt-cold",
+					"batt-cool",
+					"batt-ov",
+					"batt-low",
+					"batt-missing",
+					"batt-term-missing";
+		};
+
+		pmi8950_fg: fuel-gauge@4000 {
+			compatible = "qcom,pmi8994-fg";
+			reg = <0x4000>;
+
+			interrupts = <0x2 0x40 0x4 IRQ_TYPE_EDGE_RISING>,
+				     <0x2 0x44 0x0 IRQ_TYPE_EDGE_BOTH>;
+			interrupt-names = "soc-delta", "mem-avail";
+
+			power-supplies = <&pmi8950_smbcharger>;
+			status = "okay";
+		};
+	};
+};
+
+&pmi8950_fg {
+	monitored-battery = <&battery>;
+};
+
+&pmi8950_smbcharger {
+	monitored-battery = <&battery>;
 };
