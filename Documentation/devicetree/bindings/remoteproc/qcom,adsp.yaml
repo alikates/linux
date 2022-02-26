@@ -17,6 +17,7 @@ properties:
   compatible:
     enum:
       - qcom,msm8974-adsp-pil
+      - qcom,msm8953-adsp-pil
       - qcom,msm8996-adsp-pil
       - qcom,msm8996-slpi-pil
       - qcom,msm8998-adsp-pas
@@ -160,6 +161,7 @@ allOf:
           contains:
             enum:
               - qcom,msm8974-adsp-pil
+              - qcom,msm8953-adsp-pil
               - qcom,msm8996-adsp-pil
               - qcom,msm8996-slpi-pil
               - qcom,msm8998-adsp-pas
@@ -275,6 +277,7 @@ allOf:
           contains:
             enum:
               - qcom,msm8974-adsp-pil
+              - qcom,msm8953-adsp-pil
               - qcom,msm8996-adsp-pil
               - qcom,msm8996-slpi-pil
               - qcom,msm8998-adsp-pas
@@ -364,6 +367,7 @@ allOf:
         compatible:
           contains:
             enum:
+              - qcom,msm8953-adsp-pil
               - qcom,msm8996-adsp-pil
               - qcom,msm8998-adsp-pas
     then:
@@ -547,6 +551,7 @@ allOf:
           contains:
             enum:
               - qcom,msm8974-adsp-pil
+              - qcom,msm8953-adsp-pil
               - qcom,msm8996-adsp-pil
               - qcom,msm8996-slpi-pil
               - qcom,msm8998-adsp-pas
