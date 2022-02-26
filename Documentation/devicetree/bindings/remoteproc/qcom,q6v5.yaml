@@ -31,6 +31,7 @@ properties:
               - qcom,qcs404-wcss-pil
               - qcom,msm8916-mss-pil
               - qcom,msm8974-mss-pil
+              - qcom,msm8953-mss-pil
               - qcom,msm8996-mss-pil
               - qcom,msm8998-mss-pil
               - qcom,sc7180-mss-pil
@@ -268,6 +269,27 @@ allOf:
         compatible:
           contains:
             enum:
+              - qcom,msm8953-mss-pil
+    then:
+      properties:
+        clocks:
+          items:
+            - description: Interface clock
+            - description: Bus clock
+            - description: Memory clock
+            - description: XO clock
+        clock-names:
+          items:
+            - const: iface
+            - const: bus
+            - const: mem
+            - const: xo
+
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
               - qcom,msm8996-mss-pil
     then:
       properties:
@@ -410,6 +432,7 @@ allOf:
               - qcom,qcs404-wcss-pil
               - qcom,msm8916-mss-pil
               - qcom,msm8974-mss-pil
+              - qcom,msm8953-mss-pil
     then:
       properties:
         interrupts-extended:
@@ -479,6 +502,7 @@ allOf:
           enum:
             - qcom,msm8916-mss-pil
             - qcom,msm8974-mss-pil
+            - qcom,msm8953-mss-pil
             - qcom,msm8996-mss-pil
             - qcom,msm8998-mss-pil
     then:
@@ -573,6 +597,7 @@ allOf:
               - qcom,q6v5-pil
               - qcom,msm8916-mss-pil
               - qcom,msm8974-mss-pil
+              - qcom,msm8953-mss-pil
               - qcom,msm8996-mss-pil
               - qcom,msm8998-mss-pil
     then:
