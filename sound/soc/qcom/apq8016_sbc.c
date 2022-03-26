@@ -7,7 +7,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/io.h>
-#include <linux/of.h>
+#include <linux/of_device.h>
 #include <linux/clk.h>
 #include <linux/platform_device.h>
 #include <sound/pcm.h>
@@ -19,15 +19,23 @@
 #include "common.h"
 #include "qdsp6/q6afe.h"
 
-#define MI2S_COUNT  (MI2S_QUATERNARY + 1)
+#define MI2S_COUNT  (MI2S_QUINARY + 1)
 
 struct apq8016_sbc_data {
 	struct snd_soc_card card;
 	void __iomem *mic_iomux;
 	void __iomem *spkr_iomux;
+	void __iomem *quin_iomux;
 	struct snd_soc_jack jack;
 	bool jack_setup;
 	int mi2s_clk_count[MI2S_COUNT];
+};
+
+static const int msm8953_bitclk_map[MI2S_COUNT] = {
+	[MI2S_PRIMARY] = Q6AFE_LPASS_CLK_ID_PRI_MI2S_IBIT,
+	[MI2S_SECONDARY] = Q6AFE_LPASS_CLK_ID_SEC_MI2S_IBIT,
+	[MI2S_TERTIARY] = Q6AFE_LPASS_CLK_ID_TER_MI2S_IBIT,
+	[MI2S_QUATERNARY] = Q6AFE_LPASS_CLK_ID_QUAD_MI2S_IBIT,
 };
 
 #define MIC_CTRL_TER_WS_SLAVE_SEL	BIT(21)
@@ -64,6 +72,13 @@ static int apq8016_dai_init(struct snd_soc_pcm_runtime *rtd, int mi2s)
 		writel(readl(pdata->mic_iomux) | MIC_CTRL_QUA_WS_SLAVE_SEL_10 |
 			MIC_CTRL_TLMM_SCLK_EN,
 			pdata->mic_iomux);
+		break;
+		
+	case MI2S_QUINARY:
+		/* Configure Quinary MI2S */
+		if (!pdata->quin_iomux)
+			return -ENOENT;
+		writel(readl(pdata->quin_iomux) | 0x01, pdata->quin_iomux);
 		break;
 	case MI2S_SECONDARY:
 		/* Clear TLMM_WS_OUT_SEL and TLMM_WS_EN_SEL fields */
@@ -163,6 +178,9 @@ static int qdsp6_dai_get_lpass_id(struct snd_soc_dai *cpu_dai)
 	case QUATERNARY_MI2S_RX:
 	case QUATERNARY_MI2S_TX:
 		return MI2S_QUATERNARY;
+	case QUINARY_MI2S_RX:
+	case QUINARY_MI2S_TX:
+		return MI2S_QUINARY;
 	default:
 		return -EINVAL;
 	}
@@ -222,6 +240,53 @@ static const struct snd_soc_ops msm8916_qdsp6_be_ops = {
 	.shutdown = msm8916_qdsp6_shutdown,
 };
 
+static int msm8953_qdsp6_startup(struct snd_pcm_substream *substream)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_card *card = rtd->card;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
+	int mi2s, ret, clk_id;
+
+	mi2s = qdsp6_dai_get_lpass_id(cpu_dai);
+	if (mi2s < 0)
+		return mi2s;
+
+	clk_id = msm8953_bitclk_map[mi2s];
+
+	ret = snd_soc_dai_set_sysclk(cpu_dai, clk_id,
+			MI2S_BCLK_RATE, SNDRV_PCM_STREAM_PLAYBACK);
+	if (ret) {
+		dev_err(card->dev, "Failed to enable bit clk (clk_id = %d): %d\n", clk_id, ret);
+		return ret;
+	}
+
+	return ret;
+}
+
+static void msm8953_qdsp6_shutdown(struct snd_pcm_substream *substream)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_card *card = rtd->card;
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
+	int mi2s, ret, clk_id;
+
+	mi2s = qdsp6_dai_get_lpass_id(cpu_dai);
+	if (mi2s < 0)
+		return;
+
+	clk_id = msm8953_bitclk_map[mi2s];
+
+	ret = snd_soc_dai_set_sysclk(cpu_dai, clk_id, 0, SNDRV_PCM_STREAM_PLAYBACK);
+	if (ret)
+		dev_err(card->dev, "Failed to disable bit clk (clk_id = %d): %d\n", clk_id, ret);
+}
+
+static const struct snd_soc_ops msm8953_qdsp6_be_ops = {
+	.startup = msm8953_qdsp6_startup,
+	.shutdown = msm8953_qdsp6_shutdown,
+};
+
+
 static int msm8916_qdsp6_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 					    struct snd_pcm_hw_params *params)
 {
@@ -230,9 +295,15 @@ static int msm8916_qdsp6_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 	struct snd_interval *channels = hw_param_interval(params,
 					SNDRV_PCM_HW_PARAM_CHANNELS);
 	struct snd_mask *fmt = hw_param_mask(params, SNDRV_PCM_HW_PARAM_FORMAT);
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
+	
+	int mi2s = qdsp6_dai_get_lpass_id(cpu_dai);
+	if (mi2s < 0)
+		return mi2s;
 
 	rate->min = rate->max = 48000;
-	channels->min = channels->max = 2;
+	channels->min = (mi2s == MI2S_QUATERNARY) ? 1 : 2;
+	channels->max = 2;
 	snd_mask_set_format(fmt, SNDRV_PCM_FORMAT_S16_LE);
 
 	return 0;
@@ -255,6 +326,23 @@ static void msm8916_qdsp6_add_ops(struct snd_soc_card *card)
 	}
 }
 
+static void msm8953_qdsp6_add_ops(struct snd_soc_card *card)
+{
+	struct snd_soc_dai_link *link;
+	int i;
+
+	/* Make it obvious to userspace that QDSP6 is used */
+	card->components = "qdsp6";
+
+	for_each_card_prelinks(card, i, link) {
+		if (link->no_pcm) {
+			link->init = msm8916_qdsp6_dai_init;
+			link->ops = &msm8953_qdsp6_be_ops;
+			link->be_hw_params_fixup = msm8916_qdsp6_be_hw_params_fixup;
+		}
+	}
+}
+
 static const struct snd_soc_dapm_widget apq8016_sbc_dapm_widgets[] = {
 
 	SND_SOC_DAPM_MIC("Handset Mic", NULL),
@@ -271,7 +359,7 @@ static int apq8016_sbc_platform_probe(struct platform_device *pdev)
 	struct snd_soc_card *card;
 	struct apq8016_sbc_data *data;
 	int ret;
-
+	
 	add_ops = device_get_match_data(&pdev->dev);
 	if (!add_ops)
 		return -EINVAL;
@@ -297,6 +385,10 @@ static int apq8016_sbc_platform_probe(struct platform_device *pdev)
 	data->spkr_iomux = devm_platform_ioremap_resource_byname(pdev, "spkr-iomux");
 	if (IS_ERR(data->spkr_iomux))
 		return PTR_ERR(data->spkr_iomux);
+		
+	data->quin_iomux = devm_platform_ioremap_resource_byname(pdev, "quin-iomux");
+	if (IS_ERR(data->quin_iomux))
+		return PTR_ERR(data->quin_iomux);
 
 	snd_soc_card_set_drvdata(card, data);
 
@@ -307,6 +399,7 @@ static int apq8016_sbc_platform_probe(struct platform_device *pdev)
 static const struct of_device_id apq8016_sbc_device_id[] __maybe_unused = {
 	{ .compatible = "qcom,apq8016-sbc-sndcard", .data = apq8016_sbc_add_ops },
 	{ .compatible = "qcom,msm8916-qdsp6-sndcard", .data = msm8916_qdsp6_add_ops },
+	{ .compatible = "qcom,msm8953-qdsp6-sndcard", .data = msm8953_qdsp6_add_ops },
 	{},
 };
 MODULE_DEVICE_TABLE(of, apq8016_sbc_device_id);
