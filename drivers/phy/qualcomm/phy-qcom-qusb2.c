@@ -605,7 +605,7 @@ static int qusb2_phy_set_mode(struct phy *phy,
 	qphy->mode = mode;
 
 	if (mode >= PHY_MODE_USB_HOST && mode <= PHY_MODE_USB_HOST_SS) {
-		if (!qphy->otg_enabled) {
+		if (qphy->otg_vreg && !qphy->otg_enabled) {
 			int ret;
 
 			ret = regulator_enable(qphy->otg_vreg);
@@ -614,7 +614,7 @@ static int qusb2_phy_set_mode(struct phy *phy,
 		}
 			
 		qphy->otg_enabled = true;
-	} else if (qphy->otg_enabled) {
+	} else if (qphy->otg_vreg && qphy->otg_enabled) {
 		regulator_disable(qphy->otg_vreg);
 		qphy->otg_enabled = false;
 	}
@@ -888,7 +888,7 @@ disable_iface_clk:
 poweroff_phy:
 	regulator_bulk_disable(ARRAY_SIZE(qphy->vregs), qphy->vregs);
 
-	if (qphy->otg_enabled) {
+	if (qphy->otg_vreg && qphy->otg_enabled) {
 		regulator_disable(qphy->otg_vreg);
 		qphy->otg_enabled = false;
 	}
@@ -1038,9 +1038,13 @@ static int qusb2_phy_probe(struct platform_device *pdev)
 	}
 
 	qphy->otg_vreg = devm_regulator_get_optional(dev, "otg");
-	if (IS_ERR(qphy->otg_vreg))
-		return dev_err_probe(dev, PTR_ERR(qphy->otg_vreg),
+	if (IS_ERR(qphy->otg_vreg)) {
+		if (PTR_ERR(qphy->otg_vreg) == -EPROBE_DEFER)
+			return dev_err_probe(dev, PTR_ERR(qphy->otg_vreg),
 				"failed to get otg supply\n");
+		qphy->otg_vreg = NULL;
+	}
+
 
 	/* Get the specific init parameters of QMP phy */
 	qphy->cfg = of_device_get_match_data(dev);
