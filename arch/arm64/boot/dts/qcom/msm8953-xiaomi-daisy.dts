@@ -25,6 +25,13 @@
 	qcom,msm-id = <293 0>;
 	qcom,board-id= <0x1000b 0x9>;
 
+	battery: battery {
+		compatible = "simple-battery";
+		charge-full-design-microamp-hours = <4000000>;
+		voltage-min-design-microvolt = <3400000>;
+		voltage-max-design-microvolt = <4400000>;
+	};
+
 	chosen {
 		#address-cells = <2>;
 		#size-cells = <2>;
@@ -189,10 +196,18 @@
 };
 
 &modem {
+	status = "okay";
 	mss-supply = <&pm8953_s1>;
 	pll-supply = <&pm8953_l7>;
 };
 
+&ipa {
+	status = "okay";
+};
+
+&ipa_bam {
+	status = "okay";
+};
 
 &pm8953_resin {
 	status = "okay";
@@ -206,6 +221,16 @@
 	qcom,enabled-strings = <0 1>;
 	qcom,num-strings = <2>;
 	qcom,ovp-milivolt = <29500>;
+};
+
+&pmi8950_smbcharger {
+	status = "okay";
+	monitored-battery = <&battery>;
+};
+
+&pmi8950_fg {
+	status = "okay";
+	monitored-battery = <&battery>;
 };
 
 &pronto {

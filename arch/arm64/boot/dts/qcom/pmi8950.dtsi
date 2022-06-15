@@ -160,7 +160,7 @@
 					"flash-fail",
 					"otst2",
 					"otst3";
-			chg_otg: chg_otg {};
+			chg_otg: otg-vbus {};
 		};
 
 		pmi8950_fg: fuel-gauge@4000 {
