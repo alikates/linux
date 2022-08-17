@@ -343,37 +343,57 @@
 		};
 	};
 
-#define OPP(freqKhz, req, HW, peakBW, extra)		\
-	opp-freqKhz##000 {				\
-		opp-hz = /bits/ 64 <freqKhz##000>;	\
-		opp-supported-hw = <HW>;		\
-		opp-peak-kBps = <peakBW>;		\
-		required-opps = <&req>;			\
-		extra; \
-	}
-
-
 #define BIN_625  0x04
 #define BIN_626  0x81
 #define BIN_ALL	 0xff
 
 	cpu0_opp: cpu0-opp-table {
-		compatible = "operating-points-v2-qcom-cpu",
+		compatible = "operating-points-v2",
 			     "operating-points-v2-kryo-cpu";
 		nvmem-cells = <&cpu_speed_bin>;
 		opp-shared;
-
-		OPP( 652800, cpr_opp1, BIN_ALL, 1611000, opp-suspend);
-		OPP(1036800, cpr_opp2, BIN_ALL, 3221000, none);
-		OPP(1248000, cpr_opp3, BIN_ALL, 4550000, none);
-		OPP(1401600, cpr_opp4, BIN_ALL, 5859000, none);
-		OPP(1689600, cpr_opp5, BIN_ALL, 6445000, none);
-		OPP(1804800, cpr_opp6, BIN_ALL, 7104000, none);
-		OPP(1958400, cpr_opp7, BIN_625, 7104000, none);
-		OPP(2016000, cpr_opp8, BIN_625, 7104000, none);
-		OPP(2150400, cpr_opp9, BIN_626, 7104000, none);
-		OPP(2208000, cpr_opp10, BIN_626, 7104000, none);
-
+		
+		opp-652800000 {
+			opp-hz = /bits/ 64 <652800000>;
+			opp-supported-hw = <BIN_ALL>;
+			opp-suspend;
+		};
+		opp-1036800000 {
+			opp-hz = /bits/ 64 <1036800000>;
+			opp-supported-hw = <BIN_ALL>;
+		};
+		opp-1248000000 {
+			opp-hz = /bits/ 64 <1248000000>;
+			opp-supported-hw = <BIN_ALL>;
+		};
+		opp-1401600000 {
+			opp-hz = /bits/ 64 <1401600000>;
+			opp-supported-hw = <BIN_ALL>;
+		};
+		opp-1689600000 {
+			opp-hz = /bits/ 64 <1689600000>;
+			opp-supported-hw = <BIN_ALL>;
+		};
+		opp-1804800000 {
+			opp-hz = /bits/ 64 <1804800000>;
+			opp-supported-hw = <BIN_ALL>;
+		};
+		opp-1958400000 {
+			opp-hz = /bits/ 64 <1958400000>;
+			opp-supported-hw = <BIN_625>;
+		};
+		opp-2016000000 {
+			opp-hz = /bits/ 64 <2016000000>;
+			opp-supported-hw = <BIN_625>;
+		};
+		opp-2150400000 {
+			opp-hz = /bits/ 64 <2150400000>;
+			opp-supported-hw = <BIN_626>;
+		};
+		opp-2208000000 {
+			opp-hz = /bits/ 64 <2208000000>;
+			opp-supported-hw = <BIN_626>;
+		};
 	};
 
 	firmware {
@@ -1702,25 +1722,60 @@
 			gpu_opp_table: opp-table {
 				compatible  ="operating-points-v2";
 
-// TODO expand this
-#define GPU_OPP(freq_khz, peakBW, lvl, supp)		\
-	opp-##freq_khz##000 {				\
-		opp-hz = /bits/ 64 <freq_khz##000>;	\
-		opp-supported-hw = <supp>;		\
-		opp-avg-kBps = <0>, <(peakBW/4)>;	\
-		opp-peak-kBps = <peakBW>, <(peakBW/2)>;	\
-		required-opps = <&lvl>;			\
-	}
-
-				GPU_OPP(200000, 1689600, rpmpd_opp_low_svs, 0xff);
-				GPU_OPP(266670, 3072000, rpmpd_opp_svs, 0xff);
-				GPU_OPP(320000, 3379200, rpmpd_opp_svs, 0xff);
-				GPU_OPP(400000, 5376000, rpmpd_opp_svs_plus, 0xff);
-				GPU_OPP(460800, 6144000, rpmpd_opp_nom, 0xff);
-				GPU_OPP(510000, 6451200, rpmpd_opp_nom, 0xff);
-				GPU_OPP(560000, 6758400, rpmpd_opp_nom_plus, 0xff);
-				GPU_OPP(600000, 7449600, rpmpd_opp_turbo, 0xff);
-				GPU_OPP(650000, 7449600, rpmpd_opp_turbo, 0xff);
+				opp-200000000 {
+					opp-hz = /bits/ 64 <200000000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <200000000>, <(200000000/2)>;
+					required-opps = <&rpmpd_opp_low_svs>;
+				};
+				opp-266670000 {
+					opp-hz = /bits/ 64 <266670000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <266670000>, <(266670000/2)>;
+					required-opps = <&rpmpd_opp_svs>;
+				};
+				opp-320000000 {
+					opp-hz = /bits/ 64 <320000000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <320000000>, <(320000000/2)>;
+					required-opps = <&rpmpd_opp_svs>;
+				};
+				opp-400000000 {
+					opp-hz = /bits/ 64 <400000000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <400000000>, <(400000000/2)>;
+					required-opps = <&rpmpd_opp_svs_plus>;
+				};
+				opp-460800000 {
+					opp-hz = /bits/ 64 <460800000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <460800000>, <(460800000/2)>;
+					required-opps = <&rpmpd_opp_nom>;
+				};
+				opp-510000000 {
+					opp-hz = /bits/ 64 <510000000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <510000000>, <(510000000/2)>;
+					required-opps = <&rpmpd_opp_nom>;
+				};
+				opp-560000000 {
+					opp-hz = /bits/ 64 <560000000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <560000000>, <(560000000/2)>;
+					required-opps = <&rpmpd_opp_nom_plus>;
+				};
+				opp-600000000 {
+					opp-hz = /bits/ 64 <600000000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <600000000>, <(600000000/2)>;
+					required-opps = <&rpmpd_opp_turbo>;
+				};
+				opp-650000000 {
+					opp-hz = /bits/ 64 <650000000>;
+					opp-supported-hw = <0xff>;
+					opp-peak-kBps = <650000000>, <(650000000/2)>;
+					required-opps = <&rpmpd_opp_turbo>;
+				};
 			};
 
 			zap-shader {
