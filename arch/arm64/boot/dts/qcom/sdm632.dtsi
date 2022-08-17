@@ -4,6 +4,7 @@
 #include "msm8953.dtsi"
 
 / {
+	/*
 	/delete-node/cpu0-opp-table;
 
 	cpu0_opp: cpu0-opp-table {
@@ -32,7 +33,7 @@
 		OPP(1804800, cpr_opp6, 0x45, 5859000, none);
 		OPP(1996200, cpr_opp7, 0x04, 6987000, none);
 		OPP(2016000, cpr_opp8, 0x04, 7104000, none);
-	};
+	};*/
 
 	thermal-zones {
 		/delete-node/cpu1-thermal;
@@ -127,8 +128,8 @@
 };
 
 &gpu_opp_table {
-	GPU_OPP(685000, 7449600, rpmpd_opp_turbo, 0xff);
-	GPU_OPP(725000, 7449600, rpmpd_opp_turbo, 0xff);
+//	GPU_OPP(685000, 7449600, rpmpd_opp_turbo, 0xff);
+//	GPU_OPP(725000, 7449600, rpmpd_opp_turbo, 0xff);
 };
 
 &CPU4 {
@@ -234,6 +235,7 @@
 			   "cpr_fuse_revision",
 			   "cpr_speed_bin";
 
+	/*
 	/delete-node/cpr-opp-table;
 	cpr_opp_table: cpr-opp-table {
 		compatible = "operating-points-v2-qcom-level";
@@ -270,7 +272,7 @@
 			opp-level = <8>;
 			opp-hz = /bits/ 64 <787200000>;
 		};
-	};
+	};*/
 
 };
 
