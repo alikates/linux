@@ -341,20 +341,24 @@ init_modem_driver_req(struct ipa_qmi *ipa_qmi)
 
 	/* skip_uc_load_valid and skip_uc_load are set above */
 
-	mem = ipa_mem_find(ipa, IPA_MEM_MODEM_PROC_CTX);
-	if (mem->size) {
-		req.hdr_proc_ctx_tbl_info_valid = 1;
-		req.hdr_proc_ctx_tbl_info.start =
-			ipa->mem_offset + mem->offset;
-		req.hdr_proc_ctx_tbl_info.end =
-			req.hdr_proc_ctx_tbl_info.start + mem->size - 1;
+	if (ipa->version != IPA_VERSION_2_6L) {
+		mem = ipa_mem_find(ipa, IPA_MEM_MODEM_PROC_CTX);
+		if (mem->size) {
+			req.hdr_proc_ctx_tbl_info_valid = 1;
+			req.hdr_proc_ctx_tbl_info.start =
+				ipa->mem_offset + mem->offset;
+			req.hdr_proc_ctx_tbl_info.end =
+				req.hdr_proc_ctx_tbl_info.start + mem->size - 1;
+		}
 	}
 
-	mem = &ipa->mem[IPA_MEM_ZIP];
-	if (mem->size) {
-		req.zip_tbl_info_valid = 1;
-		req.zip_tbl_info.start = ipa->mem_offset + mem->offset;
-		req.zip_tbl_info.end = ipa->mem_offset + mem->size - 1;
+	if (ipa->version >= IPA_VERSION_2_6L) {
+		mem = &ipa->mem[IPA_MEM_ZIP];
+		if (mem && mem->size) {
+			req.zip_tbl_info_valid = 1;
+			req.zip_tbl_info.start = ipa->mem_offset + mem->offset;
+			req.zip_tbl_info.end = ipa->mem_offset + mem->size - 1;
+		}
 	}
 
 	if (ipa_table_hash_support(ipa)) {

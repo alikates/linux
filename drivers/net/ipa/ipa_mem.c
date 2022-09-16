@@ -103,8 +103,11 @@ int ipa_mem_setup(struct ipa *ipa)
 
 	ipa_cmd_hdr_init_local_add(trans, offset, size, addr);
 
-	ipa_mem_zero_region_add(trans, IPA_MEM_MODEM_PROC_CTX);
-	ipa_mem_zero_region_add(trans, IPA_MEM_AP_PROC_CTX);
+	if (ipa->version >= IPA_VERSION_3_0 || ipa->version == IPA_VERSION_2_5) {
+		ipa_mem_zero_region_add(trans, IPA_MEM_MODEM_PROC_CTX);
+		ipa_mem_zero_region_add(trans, IPA_MEM_AP_PROC_CTX);
+	}
+
 	ipa_mem_zero_region_add(trans, IPA_MEM_MODEM);
 
 	/* Only IPA v2.6L has the compression/decompression region */
@@ -145,14 +148,18 @@ static bool ipa_mem_id_valid(struct ipa *ipa, enum ipa_mem_id mem_id)
 	case IPA_MEM_V6_ROUTE:
 	case IPA_MEM_MODEM_HEADER:
 	case IPA_MEM_AP_HEADER:
-	case IPA_MEM_MODEM_PROC_CTX:
-	case IPA_MEM_AP_PROC_CTX:
 	case IPA_MEM_MODEM:
 	case IPA_MEM_UC_EVENT_RING:
 	case IPA_MEM_PDN_CONFIG:
 	case IPA_MEM_STATS_QUOTA_MODEM:
 	case IPA_MEM_STATS_QUOTA_AP:
 	case IPA_MEM_END_MARKER:	/* pseudo region */
+		break;
+
+	case IPA_MEM_MODEM_PROC_CTX:
+	case IPA_MEM_AP_PROC_CTX:
+		if (version == IPA_VERSION_2_6L)
+			return false;
 		break;
 
 	case IPA_MEM_ZIP:
@@ -198,10 +205,11 @@ static bool ipa_mem_id_required(struct ipa *ipa, enum ipa_mem_id mem_id)
 	case IPA_MEM_V4_ROUTE:
 	case IPA_MEM_V6_ROUTE:
 	case IPA_MEM_MODEM_HEADER:
-	case IPA_MEM_MODEM_PROC_CTX:
-	case IPA_MEM_AP_PROC_CTX:
 	case IPA_MEM_MODEM:
 		return true;
+	case IPA_MEM_MODEM_PROC_CTX:
+	case IPA_MEM_AP_PROC_CTX:
+		return ipa->version != IPA_VERSION_2_6L;
 
 	case IPA_MEM_V4_FILTER_HASHED:
 	case IPA_MEM_V6_FILTER_HASHED:
